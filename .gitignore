@@ -1,0 +1,4 @@
+log/*
+secrets/*
+__pycache__/*
+**/*.log
