@@ -1,13 +1,9 @@
-import os
 import logging
 import time
 import threading
 
 import sensor_repo as sr
 import utils
-
-os.system("modprobe w1_gpio")
-os.system("modprobe w1_therm")
 
 class watervolume_thread (threading.Thread):
     

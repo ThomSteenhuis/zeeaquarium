@@ -14,17 +14,6 @@ class relay_thread (threading.Thread):
         GPIO.setup(PINS["relay4"]["pin"], GPIO.OUT)
         GPIO.setup(PINS["relay6"]["pin"], GPIO.OUT)
         GPIO.setup(PINS["relay8"]["pin"], GPIO.OUT)
-
-        GPIO.output(PINS["relay2"]["pin"], GPIO.HIGH) # On
-        time.sleep(0.1)
-
-        GPIO.output(PINS["relay4"]["pin"], GPIO.HIGH) # On
-        time.sleep(0.1)
-
-        GPIO.output(PINS["relay6"]["pin"], GPIO.HIGH) # On
-        time.sleep(0.1)
-
-        GPIO.output(PINS["relay8"]["pin"], GPIO.HIGH) # On
         
         for key in PINS:
             add_device_status_request([key])
@@ -41,8 +30,6 @@ class relay_thread (threading.Thread):
                 switch_device(switch_data["device"], switch_data["on"])
                 
             time.sleep(0.1)
-            
-        GPIO.cleanup()
 
 CONTEXT = "[relay]"
 

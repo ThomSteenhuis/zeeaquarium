@@ -56,7 +56,6 @@ class watervolume_thread (threading.Thread):
                     logging.warning(f"{CONTEXT} cannot send signalR message")
         
         thread = None
-        GPIO.cleanup()
 
 CONTEXT = "[watervolume]"
 

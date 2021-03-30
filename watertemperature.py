@@ -26,3 +26,5 @@ try:
         time.sleep(1)
 except KeyboardInterrupt:
     pass
+finally:
+    repo.close_connection()
