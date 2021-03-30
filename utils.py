@@ -1,6 +1,7 @@
 import glob
 import logging
 import requests
+import sqlite3
 import time
 
 from datetime import datetime
@@ -35,6 +36,9 @@ def login():
     if response.status_code == 200:
         return response.json()["token"]
     raise requests.exceptions.ConnectionError()
+
+def print_measurement(data):
+    print(f"{data}")
     
 def empty_handler(data):
     pass
@@ -82,3 +86,20 @@ def read_temp(index, context):
         logging.warning(f"{context} file is corrupted")
     except IndexError:
         logging.warning(f"{context} file does not exist")
+        
+def create_sql_connection(db_name, context):
+    conn = None
+    try:        
+        conn = sqlite3.connect(db_name)
+    except:
+        logging.warning(f"{context} sql connection error")
+    return conn
+
+def get_db_row(cursor, table, column, value):
+    cursor.execute("select * from " + table + " where " + column + " = '" + value + "'")
+    return cursor.fetchone()
+
+def insert_db_value(connection, table, id_column, id_value, column, value):
+    cursor = connection.cursor()
+    cursor.execute("update " + table + " set " + column + " = " + value + " where "+ id_column + " = " + id_value)
+    connection.commit()

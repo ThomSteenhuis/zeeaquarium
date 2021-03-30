@@ -1,50 +1,28 @@
 import os
 import logging
 import time
-import threading
 
+import sensor_repo as sr
 import utils
+        
+CONTEXT = "watertemperature"
 
 os.system("modprobe w1_gpio")
 os.system("modprobe w1_therm")
 
-class watervolume_thread (threading.Thread):
-    
-    def __init__(self):
-        threading.Thread.__init__(self)
-        
-        
-    def run(self):
-        global thread
-        
-        while is_streaming:
-            temp = utils.read_temp(0, CONTEXT)
-        
-            if not temp is None:
-                try:
-                    hub_connection.send("broadcastMeasurement", ["watertemperature", str(temp)])
-                except:
-                    logging.warning(f"{CONTEXT} cannot send signalR message")
-            
-            time.sleep(3)
-        
-        thread = None
-        
-CONTEXT = "[watertemperature]"
+utils.setup_logging(CONTEXT)
 
-hub_connection = None
-is_streaming = False
-thread = None
+repo = sr.sensor_repo(CONTEXT)
 
-def start_thread(connection):
-    global hub_connection, is_streaming, thread
-    hub_connection = connection
-    is_streaming = True
-    
-    if thread is None:
-        thread = watervolume_thread()
-        thread.start()
-    
-def stop_thread():
-    global is_streaming
-    is_streaming = False
+try:
+    while True:
+        temp = utils.read_temp(0, "[" + CONTEXT + "]")
+
+        if temp and temp > 15 and temp < 35:
+            repo.set_value(temp)
+        else:
+            logging.warning(f"[{CONTEXT}] measurement invalid")
+        
+        time.sleep(1)
+except KeyboardInterrupt:
+    pass

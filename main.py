@@ -4,7 +4,8 @@ import time
 
 import ambienttemperature
 import relay
-import watertemperature
+import light
+import watertemperature_thread
 import watervolume
 import utils
 
@@ -27,15 +28,17 @@ def start_threads():
     set_streaming(True) 
     relay.start_thread(hub_connection)
     ambienttemperature.start_thread(hub_connection)
-    watertemperature.start_thread(hub_connection)
+    watertemperature_thread.start_thread(hub_connection)
     watervolume.start_thread(hub_connection)
+    light.start_thread(hub_connection)
 
 def stop_threads():
     set_streaming(False)
     relay.stop_thread()
     ambienttemperature.stop_thread()
-    watertemperature.stop_thread()
+    watertemperature_thread.stop_thread()
     watervolume.stop_thread()
+    light.stop_thread()
 
 def set_streaming(on):
     global is_streaming, start_streaming
