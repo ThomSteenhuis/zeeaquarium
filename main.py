@@ -3,7 +3,7 @@ import os
 import time
 
 import ambienttemperature
-import relay
+import relay_thread
 import light
 import watertemperature_thread
 import watervolume
@@ -26,7 +26,7 @@ def left_group(data):
 
 def start_threads():
     set_streaming(True) 
-    relay.start_thread(hub_connection)
+    relay_thread.start_thread(hub_connection)
     ambienttemperature.start_thread(hub_connection)
     watertemperature_thread.start_thread(hub_connection)
     watervolume.start_thread(hub_connection)
@@ -34,7 +34,7 @@ def start_threads():
 
 def stop_threads():
     set_streaming(False)
-    relay.stop_thread()
+    relay_thread.stop_thread()
     ambienttemperature.stop_thread()
     watertemperature_thread.stop_thread()
     watervolume.stop_thread()
@@ -80,8 +80,8 @@ try:
                 hub_connection.on("ping", adjust_last_message)
                 hub_connection.on("joinedGroup", joined_group)
                 hub_connection.on("leftGroup", left_group)
-                hub_connection.on("switchDevice", relay.add_switch_device)
-                hub_connection.on("requestDeviceStatus", relay.add_device_status_request)
+                hub_connection.on("switchDevice", relay_thread.add_switch_device)
+                hub_connection.on("requestDeviceStatus", relay_thread.add_device_status_request)
                 hub_connection.start()
             except:
                 logging.warning(f"{CONTEXT} signalR connection problem")

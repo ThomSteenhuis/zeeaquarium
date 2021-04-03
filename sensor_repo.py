@@ -22,7 +22,7 @@ class sensor_repo:
             sensor_id_row = self.cursor.fetchone()
                     
             if sensor_id_row and len(sensor_id_row) == 2:
-                self.sensor_id = sensor_id_row[1]
+                self.sensor_id = sensor_id_row[0]
             else:
                 logging.warning(f"[{self.sensor_name}] sensor id cannot be found in db")
         else:

@@ -1,41 +1,41 @@
-import RPi.GPIO as GPIO
 import logging
 import time
 
 import sensor_repo as sr
+import device_repo as dr
 import utils
         
 CONTEXT = "climate_control"
-HEATING_PIN = 33
 
+HEATING = "verwarming"
 TEMP_HEATING_THRESHOLD = 24
 
 utils.setup_logging(CONTEXT)
-GPIO.setmode(GPIO.BOARD)
-GPIO.setup(HEATING_PIN, GPIO.OUT)
 
-repo = sr.sensor_repo("watertemperature")
+sensor_repo = sr.sensor_repo("watertemperature")
+device_repo = dr.device_repo()
 
 try:
     while True:
         temps = []
         while len(temps) < 60:
-            temp = repo.get_value()
+            temp = sensor_repo.get_value()
             if temp:
                 try:
                     temps.append(float(temp))
                 except ValueError:
                     logging.warning(f"[{CONTEXT}] measurement is not a float")
             else:
-                logging.warning(f"[{CONTEXT}] measurement could not be retrieved from repo")
+                logging.warning(f"[{CONTEXT}] measurement could not be retrieved from sensor_repo")
                     
             time.sleep(1)
                          
         if (sum(temps) / len(temps)) > TEMP_HEATING_THRESHOLD:
-            GPIO.output(HEATING_PIN, GPIO.LOW) # Off
+            device_repo.set_value(HEATING, False)
         else:
-            GPIO.output(HEATING_PIN, GPIO.HIGH) # On 
+            device_repo.set_value(HEATING, True)
 except KeyboardInterrupt:
     pass
 finally:
-    repo.close_connection()
+    sensor_repo.close_connection()
+    device_repo.close_connection()
