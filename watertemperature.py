@@ -21,7 +21,7 @@ try:
         if temp and temp > 15 and temp < 35:
             repo.set_value(temp)
         else:
-            logging.warning(f"[{CONTEXT}] measurement invalid")
+            logging.warning(f"[{CONTEXT}] invalid measurement")
         
         time.sleep(1)
 except KeyboardInterrupt:
