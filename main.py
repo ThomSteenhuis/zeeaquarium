@@ -2,11 +2,11 @@ import logging
 import os
 import time
 
-import ambienttemperature
+import ambienttemperature_thread
 import relay_thread
-import light
+import light_thread
 import watertemperature_thread
-import watervolume
+import watervolume_thread
 import utils
 
 def adjust_last_message(data):
@@ -27,18 +27,18 @@ def left_group(data):
 def start_threads():
     set_streaming(True) 
     relay_thread.start_thread(hub_connection)
-    ambienttemperature.start_thread(hub_connection)
+    ambienttemperature_thread.start_thread(hub_connection)
     watertemperature_thread.start_thread(hub_connection)
-    watervolume.start_thread(hub_connection)
-    light.start_thread(hub_connection)
+    watervolume_thread.start_thread(hub_connection)
+    light_thread.start_thread(hub_connection)
 
 def stop_threads():
     set_streaming(False)
     relay_thread.stop_thread()
-    ambienttemperature.stop_thread()
+    ambienttemperature_thread.stop_thread()
     watertemperature_thread.stop_thread()
-    watervolume.stop_thread()
-    light.stop_thread()
+    watervolume_thread.stop_thread()
+    light_thread.stop_thread()
 
 def set_streaming(on):
     global is_streaming, start_streaming
