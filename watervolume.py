@@ -15,7 +15,7 @@ SURFACE_AREA = 3.88 * 9.84 # dm
 MAX_VOLUME = 196.62 # dm3
 
 utils.setup_logging(CONTEXT)
-repo = sr.sensor_repo(CONTEXT)
+repo = sr.sensor_repo()
 
 GPIO.setmode(GPIO.BOARD)
 GPIO.setup(PIN_TRIGGER, GPIO.OUT)
@@ -52,7 +52,7 @@ try:
         measurements.sort()
         volume = round(sum(measurements[75:225]) / 150, 2)
         if not volume is None:
-            repo.set_value(volume)
+            repo.set_value(CONTEXT, volume)
         else:
             logging.warning(f"[{CONTEXT}] invalid measurement")
 except KeyboardInterrupt:

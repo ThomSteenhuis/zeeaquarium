@@ -21,6 +21,10 @@ class device_repo:
             logging.warning(f"[{CONTEXT}] db connection cannot be made")
     
     def get_device_names(self):
+        if not self.cursor:
+            logging.warning(f"[{CONTEXT}] cursor not set")
+            return
+        
         self.cursor.execute(f"select name from {DB_DEVICES};")
         device_names = self.cursor.fetchall()
         
@@ -34,6 +38,13 @@ class device_repo:
             logging.warning(f"[{CONTEXT}] device names cannot be found in db")  
         
     def get_pin(self, name):
+        if not self.cursor:
+            logging.warning(f"[{CONTEXT}] cursor not set")
+            return
+        if not name:
+            logging.warning(f"[{CONTEXT}] illegal name")
+            return
+        
         relay = self.get_relay(name)
         self.cursor.execute(f"select pin from {DB_RELAY_PIN} where relay = {relay};")
         pin = self.cursor.fetchone()
@@ -44,6 +55,13 @@ class device_repo:
             logging.warning(f"[{CONTEXT}] pin cannot be found in db")
             
     def get_relay(self, name):
+        if not self.cursor:
+            logging.warning(f"[{CONTEXT}] cursor not set")
+            return
+        if not name:
+            logging.warning(f"[{CONTEXT}] illegal name")
+            return
+        
         self.cursor.execute(f"select relay from {DB_DEVICES} left join {DB_DEVICE_RELAY} on {DB_DEVICES}.id = {DB_DEVICE_RELAY}.id where name = '{name}';")
         device_relay = self.cursor.fetchone()
         
@@ -53,6 +71,13 @@ class device_repo:
             logging.warning(f"[{CONTEXT}] device relay cannot be found in db")
         
     def get_value(self, name):
+        if not self.cursor:
+            logging.warning(f"[{CONTEXT}] cursor not set")
+            return
+        if not name:
+            logging.warning(f"[{CONTEXT}] illegal name")
+            return
+        
         self.cursor.execute(f"select value from {DB_DEVICES} left join {DB_DEVICE_VALUES} on {DB_DEVICES}.id = {DB_DEVICE_VALUES}.id where name = '{name}';")
         device_value = self.cursor.fetchone()
         
@@ -83,10 +108,8 @@ class device_repo:
             return            
         
         try:
-            val = 0
-            if value:
-                val = 1
-                
+            val = 0 if not value else 1
+            
             self.cursor.execute(f"update {DB_DEVICE_VALUES} set value = {val} where id = '{device_id[0]}'")
             self.conn.commit()
         except:
