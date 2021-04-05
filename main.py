@@ -2,6 +2,7 @@ import logging
 import os
 import time
 
+import camera_thread
 import relay_thread
 import sensor_thread
 import utils
@@ -22,12 +23,14 @@ def left_group(data):
         logging.info(f"{CONTEXT} left group: {data}")
 
 def start_threads():
-    set_streaming(True) 
+    set_streaming(True)
+    camera_thread.start_thread(hub_connection)
     relay_thread.start_thread(hub_connection)
     sensor_thread.start_thread(hub_connection)
 
 def stop_threads():
     set_streaming(False)
+    camera_thread.stop_thread()
     relay_thread.stop_thread()
     sensor_thread.stop_thread()
 
@@ -86,4 +89,5 @@ try:
 except KeyboardInterrupt:
     pass
 finally:
+    stop_threads()
     hub_connection.stop()

@@ -33,10 +33,7 @@ class sensor_thread (threading.Thread):
         repo.close_connection()
         thread = None
         
-CONTEXT = "sensor_repo"
-DB_NAME = "/home/pi/zeeaquarium"
-DB_SENSORS = "sensors"
-DB_SENSOR_VALUES = "sensor_values"
+CONTEXT = "sensor"
 
 hub_connection = None
 is_streaming = False
