@@ -36,4 +36,3 @@ except KeyboardInterrupt:
 finally:
     device_repo.close_connection()
     setting_repo.close_connection()
-                

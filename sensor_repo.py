@@ -38,7 +38,7 @@ class sensor_repo:
         else:
             logging.warning(f"[{CONTEXT}] sensor names cannot be found in db")  
     
-    def get_value(self, name):
+    def get_value(self, name, max_seconds_outdated = MAX_SECONDS_OUTDATED):
         if not self.cursor:
             logging.warning(f"[{CONTEXT}] cursor not set")
             return
@@ -64,7 +64,7 @@ class sensor_repo:
         diff = now - value_datetime
         diff_in_s = diff.total_seconds()
         
-        if diff_in_s < MAX_SECONDS_OUTDATED:
+        if diff_in_s < max_seconds_outdated:
             return sensor_value_row[0]
         else:
             logging.warning(f"[{CONTEXT}] sensor value of {name} in db is outdated")

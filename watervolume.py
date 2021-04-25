@@ -6,6 +6,7 @@ import sensor_repo as sr
 import utils
 
 CONTEXT = "watervolume"
+WATERVOLUME_AVG = "watervolume_avg"
 
 PIN_TRIGGER = 13
 PIN_ECHO = 11
@@ -25,6 +26,7 @@ GPIO.output(PIN_TRIGGER, GPIO.LOW)
 time.sleep(2)
 
 try:
+    measurements_avg = []
     while True:
         measurements = []
         while len(measurements) < 300:                
@@ -51,10 +53,17 @@ try:
         
         measurements.sort()
         volume = round(sum(measurements[75:225]) / 150, 2)
+        
         if not volume is None:
+            measurements_avg.append(volume)
             repo.set_value(CONTEXT, volume)
         else:
             logging.warning(f"[{CONTEXT}] invalid measurement")
+        
+        if len(measurements_avg) >= 100:
+            repo.set_value(WATERVOLUME_AVG, round(sum(measurements_avg) / len(measurements_avg), 2))
+            measurements_avg = []
+        
 except KeyboardInterrupt:
     pass
 finally:
