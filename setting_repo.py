@@ -1,6 +1,4 @@
-import datetime as dt
 import logging
-import pytz
 import sqlite3
 
 import utils

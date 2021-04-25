@@ -1,17 +1,17 @@
+import datetime as dt
 import glob
 import logging
 import requests
 import sqlite3
 import time
 
-from datetime import datetime
 from signalrcore.hub_connection_builder import HubConnectionBuilder
 
 BASE_DIR_TEMP = "/sys/bus/w1/devices"
 SECRETS_DIR = "/home/pi/Desktop/zeeaquarium/secrets/"
 
 def setup_logging(name):
-    now = datetime.now()
+    now = dt.datetime.now()
     logfile_name = "/home/pi/Desktop/zeeaquarium/logs/" + name + "/" + name + "_" + now.strftime("%d-%m-%Y %H:%M:%S") + ".log"
     logging.basicConfig(filename=logfile_name, filemode="w", level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s")
 
@@ -58,6 +58,16 @@ def create_hub_connection(context):
 def time_diff(start, end):
     return end - start
 
+def parse_string_to_time(context, time_string):
+    if not len(time_string) == 4:
+        logging.warning(f"[{context}] cannot parse {time_string} to time")
+        return
+    
+    try:
+        return dt.time(int(time_string[:2]), int(time_string[2:]))
+    except ValueError:
+        logging.warning(f"[{context}] cannot parse {time_string} to time")
+        
 def read_temp_raw(file, context):
     try:
         with open(file, "r") as f:

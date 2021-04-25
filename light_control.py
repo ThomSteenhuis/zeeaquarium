@@ -3,27 +3,30 @@ import logging
 import time
 
 import device_repo as dr
+import setting_repo as setr
 import utils
 
 CONTEXT = "light_control"
 LIGHT = "verlichting"
-
-LIGHTS_ON_AT = dt.time(8,0)
-LIGHTS_OFF_AT = dt.time(20,0)
+LIGHTS_ON = "verlichting_aan_tijdstip"
+LIGHTS_OFF = "verlichting_uit_tijdstip"
 
 utils.setup_logging(CONTEXT)
 device_repo = dr.device_repo()
+setting_repo = setr.setting_repo()
 
 old = dt.datetime.now().time()
 
 try:
     while True:
+        lights_on_at = utils.parse_string_to_time(CONTEXT, setting_repo.get_value(LIGHTS_ON))
+        lights_off_at = utils.parse_string_to_time(CONTEXT, setting_repo.get_value(LIGHTS_OFF))
         now = dt.datetime.now().time()
-        if (now >= LIGHTS_ON_AT and old < LIGHTS_ON_AT):
-            device_repo.set_value(LIGHT, True)
-            
         
-        if (now >= LIGHTS_OFF_AT and old < LIGHTS_OFF_AT):
+        if (now >= lights_on_at and old < lights_on_at):
+            device_repo.set_value(LIGHT, True)            
+        
+        if (now >= lights_off_at and old < lights_off_at):
             device_repo.set_value(LIGHT, False)
         
         old = now
@@ -31,5 +34,6 @@ try:
 except KeyboardInterrupt:
     pass
 finally:
-    sensor_repo.close_connection()
-    
+    device_repo.close_connection()
+    setting_repo.close_connection()
+                
