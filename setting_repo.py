@@ -61,7 +61,3 @@ class setting_repo:
 
     def close_connection(self):
         self.conn.close()
-
-repo = setting_repo()
-repo.set_value("licht_uit_tijdstip", "2000")
-print(repo.get_value("licht_uit_tijdstip"))
