@@ -91,7 +91,7 @@ class sensor_repo:
             self.cursor.execute(f"update {DB_SENSOR_VALUES} set value = {str(value)}, datetime = datetime('now') where id = {sensor_id[0]}")
             self.conn.commit()
         except:
-            logging.warning(f"[{self.sensor_name}] cannot insert measurement in db")
+            logging.warning(f"[{CONTEXT}] cannot insert measurement in db")
 
     def close_connection(self):
         self.conn.close()
