@@ -13,7 +13,7 @@ repo = dr.device_repo()
 
 pins = []
 for name in repo.get_device_names():
-    pins.append({ "name": name, "pin": repo.get_pin(name) })
+    pins.append({ "name": name, "pin": repo.get_pin(name), "default": repo.get_default(name) })
 
 try:
     GPIO.setmode(GPIO.BOARD)
@@ -27,10 +27,14 @@ try:
             if value is None or not isinstance(value, bool):
                 logging.warning(f"[{CONTEXT}] illegal value")
             else:
-                if value:
-                    GPIO.output(p["pin"], GPIO.HIGH) # On
-                else:
+                if value and p["default"]:
+                    GPIO.output(p["pin"], GPIO.HIGH) # On:
+                elif value and not p["default"]:
+                    GPIO.output(p["pin"], GPIO.LOW) # On
+                elif not value and p["default"]:
                     GPIO.output(p["pin"], GPIO.LOW) # Off
+                else:
+                    GPIO.output(p["pin"], GPIO.HIGH) # Off
         
         time.sleep(0.1)          
 except KeyboardInterrupt:

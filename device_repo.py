@@ -8,6 +8,7 @@ DB_NAME = "/home/pi/zeeaquarium"
 DB_DEVICES = "devices"
 DB_DEVICE_RELAY = "device_relay"
 DB_DEVICE_VALUES = "device_values"
+DB_RELAY_DEFAULT = "relay_default"
 DB_RELAY_PIN = "relay_pin"
 CONTEXT = "device_repo"
 
@@ -36,6 +37,23 @@ class device_repo:
             return names
         else:
             logging.warning(f"[{CONTEXT}] device names cannot be found in db")  
+        
+    def get_default(self, name):
+        if not self.cursor:
+            logging.warning(f"[{CONTEXT}] cursor not set")
+            return
+        if not name:
+            logging.warning(f"[{CONTEXT}] illegal name")
+            return
+        
+        relay = self.get_relay(name)
+        self.cursor.execute(f"select default_value from {DB_RELAY_DEFAULT} where relay = {relay};")
+        pin = self.cursor.fetchone()
+        
+        if pin and len(pin) == 1:
+            return pin[0]
+        else:
+            logging.warning(f"[{CONTEXT}] pin cannot be found in db")
         
     def get_pin(self, name):
         if not self.cursor:

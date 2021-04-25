@@ -13,12 +13,12 @@ def adjust_last_message(data):
     last_message = time.time()
         
 def joined_group(data):    
-    if data[1] == "viewers" and not is_streaming:
+    if data[1] == "watchers" and not is_streaming:
         start_threads()
         logging.info(f"{CONTEXT} joined group: {data}")
         
 def left_group(data):    
-    if data[1] == "viewers":
+    if data[1] == "watchers":
         stop_threads()
         logging.info(f"{CONTEXT} left group: {data}")
 
@@ -45,7 +45,7 @@ def set_streaming(on):
 CONTEXT = "[main]"
 REBOOT_AFTER_TIME_WITHOUT_CONNECTION = 900
 STARTUP_TIME = 30
-MAX_STREAMING_TIME = 180
+MAX_STREAMING_TIME = 30
 PING_INTERVAL = 10
 
 hub_connection = utils.create_hub_connection(CONTEXT)
