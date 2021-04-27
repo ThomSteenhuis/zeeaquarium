@@ -34,19 +34,34 @@ try:
             watervolume_current = float(sensor_repo.get_value(WATERVOLUME_AVG, 3600))
             watervolume_reservoir = float(sensor_repo.get_value(WATERVOLUME_RESERVOIR, 3600))
             
-            if not watervolume_target or not watervolume_current:
+            if not watervolume_target:
+                logging.warning(f"[{CONTEXT}] target watervolume could be retrieved")
                 continue
+                
+            if not watervolume_current:
+                logging.warning(f"[{CONTEXT}] current watervolume could be retrieved")
+                continue
+            
+            if not watervolume_reservoir or watervolume_reservoir > 22:
+                logging.warning(f"[{CONTEXT}] reservoir watervolume could be retrieved")
+                continue             
+            
+            if watervolume_reservoir < 2:
+                logging.warning(f"[{CONTEXT}] reservoir almost empty")
+                continue   
             
             watervolume_topoff = min(2, watervolume_target - watervolume_current)
             
-            if watervolume_topoff <= 0 or watervolume_reservoir < 2 or watervolume > 22:
-                continue
-            
-            time_topoff = 60 * watervolume_topoff / (watervolume_reservoir * (VOLUME_PM_20 - VOLUME_PM_10) / 10 + 2 * VOLUME_PM_10 - VOLUME_PM_20)
-            
-            device_repo.set_value(ATO, True)            
-            time.sleep(time_topoff)
-            device_repo.set_value(ATO, False)
+            if watervolume_topoff <= 0:
+                logging.info(f"[{CONTEXT}] no need to top off")
+            else:            
+                time_topoff = 60 * watervolume_topoff / (watervolume_reservoir * (VOLUME_PM_20 - VOLUME_PM_10) / 10 + 2 * VOLUME_PM_10 - VOLUME_PM_20)
+                
+                device_repo.set_value(ATO, True)            
+                time.sleep(time_topoff)
+                device_repo.set_value(ATO, False)
+                
+                logging.info(f"[{CONTEXT}] topped off {watervolume_topoff}L")
         
         old = now
         time.sleep(1)
