@@ -29,7 +29,7 @@ try:
         water_topoff_at = utils.parse_string_to_time(CONTEXT, setting_repo.get_value(WATER_TOPOFF_AT))
         now = dt.datetime.now().time()
         
-        if True:
+        if now >= water_topoff_at and old < water_topoff_at:
             watervolume_target = float(setting_repo.get_value(WATERVOLUME_TARGET))
             watervolume_current = float(sensor_repo.get_value(WATERVOLUME_AVG, 3600))
             watervolume_reservoir = float(sensor_repo.get_value(WATERVOLUME_RESERVOIR, 3600))
