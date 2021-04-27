@@ -29,6 +29,8 @@ try:
             logging.warning(f"[{CONTEXT}] invalid measurement")
 except KeyboardInterrupt:
     pass
+except:
+    logging.error(f"[{CONTEXT}] unknown error")
 finally:
     adc.close()
     repo.close_connection()

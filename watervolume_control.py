@@ -52,6 +52,8 @@ try:
         time.sleep(1)
 except KeyboardInterrupt:
     pass
+except:
+    logging.error(f"[{CONTEXT}] unknown error")
 finally:
     device_repo.set_value(ATO, False)
     device_repo.close_connection()

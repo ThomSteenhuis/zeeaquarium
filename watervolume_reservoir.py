@@ -64,6 +64,8 @@ try:
         
 except KeyboardInterrupt:
     pass
+except:
+    logging.error(f"[{CONTEXT}] unknown error")
 finally:
     repo.close_connection()
     

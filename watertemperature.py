@@ -25,5 +25,7 @@ try:
         time.sleep(1)
 except KeyboardInterrupt:
     pass
+except:
+    logging.error(f"[{CONTEXT}] unknown error")
 finally:
     repo.close_connection()

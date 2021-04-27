@@ -56,6 +56,8 @@ try:
             device_repo.set_value(COOLING, False) #Off
 except KeyboardInterrupt:
     pass
+except:
+    logging.error(f"[{CONTEXT}] unknown error")
 finally:
     sensor_repo.close_connection()
     setting_repo.close_connection()
