@@ -26,6 +26,8 @@ old = dt.datetime.now().time()
 
 try:
     while True:
+        device_repo.set_value(ATO, False)
+        
         water_topoff_at = utils.parse_string_to_time(CONTEXT, setting_repo.get_value(WATER_TOPOFF_AT))
         now = dt.datetime.now().time()
         
