@@ -9,13 +9,13 @@ import utils
 
 CONTEXT = "watervolume_control"
 ATO = "ato"
+FLOATSENSOR = "vlotter"
 WATER_TOPOFF_AT = "water_bijvul_tijdstip"
 WATERVOLUME_TARGET = "watervolume_streefwaarde"
 WATERVOLUME_AVG = "watervolume_avg"
 WATERVOLUME_RESERVOIR = "watervolume_reservoir"
 MAX_TOPOFF_VOLUME = 2
-VOLUME_PM_20 = 1
-VOLUME_PM_10 = 0.8
+VOLUME_PM = 1.4
 
 utils.setup_logging(CONTEXT)
 device_repo = dr.device_repo()
@@ -27,6 +27,9 @@ old = dt.datetime.now().time()
 try:
     while True:
         device_repo.set_value(ATO, False)
+        
+        if sensor_repo.get_value(FLOATSENSOR, 0) == "1":
+            logging.warning(f"[{CONTEXT}] water level too high")
         
         water_topoff_at = utils.parse_string_to_time(CONTEXT, setting_repo.get_value(WATER_TOPOFF_AT))
         now = dt.datetime.now().time()
@@ -57,13 +60,13 @@ try:
             if watervolume_topoff <= 0:
                 logging.info(f"[{CONTEXT}] no need to top off")
             else:            
-                time_topoff = 60 * watervolume_topoff / (watervolume_reservoir * (VOLUME_PM_20 - VOLUME_PM_10) / 10 + 2 * VOLUME_PM_10 - VOLUME_PM_20)
+                time_topoff = 60 * watervolume_topoff / VOLUME_PM
                 
                 device_repo.set_value(ATO, True)            
                 time.sleep(time_topoff)
                 device_repo.set_value(ATO, False)
                 
-                logging.info(f"[{CONTEXT}] topped off {watervolume_topoff}L")
+                logging.info(f"[{CONTEXT}] topped off {round(watervolume_topoff, 1)}L")
         
         old = now
         time.sleep(1)

@@ -64,7 +64,7 @@ class sensor_repo:
         diff = now - value_datetime
         diff_in_s = diff.total_seconds()
         
-        if diff_in_s < max_seconds_outdated:
+        if max_seconds_outdated == 0 or diff_in_s < max_seconds_outdated:
             return sensor_value_row[0]
         else:
             logging.warning(f"[{CONTEXT}] sensor value of {name} in db is outdated")

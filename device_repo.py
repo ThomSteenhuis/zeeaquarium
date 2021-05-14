@@ -10,6 +10,7 @@ DB_DEVICE_RELAY = "device_relay"
 DB_DEVICE_VALUES = "device_values"
 DB_RELAY_DEFAULT = "relay_default"
 DB_RELAY_PIN = "relay_pin"
+DB_RELAY_SENSORS = "relay_sensor_channel"
 CONTEXT = "device_repo"
 
 class device_repo:
@@ -20,6 +21,22 @@ class device_repo:
             self.cursor = self.conn.cursor()
         else:
             logging.warning(f"[{CONTEXT}] db connection cannot be made")
+    
+    def get_device_name(self, device):
+        if not self.cursor:
+            logging.warning(f"[{CONTEXT}] cursor not set")
+            return
+        if not device:
+            logging.warning(f"[{CONTEXT}] illegal device")
+            return
+        
+        self.cursor.execute(f"select name from {DB_DEVICES} where id = {device};")
+        device_name = self.cursor.fetchone()
+        
+        if device_name and len(device_name) == 1:
+            return device_name[0]
+        else:
+            logging.warning(f"[{CONTEXT}] device name cannot be found in db")  
     
     def get_device_names(self):
         if not self.cursor:
@@ -87,6 +104,42 @@ class device_repo:
             return device_relay[0]
         else:
             logging.warning(f"[{CONTEXT}] device relay cannot be found in db")
+            
+    def get_device(self, relay):
+        if not self.cursor:
+            logging.warning(f"[{CONTEXT}] cursor not set")
+            return
+        if not relay:
+            logging.warning(f"[{CONTEXT}] illegal relay")
+            return
+        
+        self.cursor.execute(f"select id from {DB_DEVICE_RELAY} where relay = {relay};")
+        device = self.cursor.fetchone()
+        
+        if device and len(device) == 1:
+            return device[0]
+        else:
+            logging.warning(f"[{CONTEXT}] device cannot be found in db")
+            
+    def get_relay_sensors(self):
+        if not self.cursor:
+            logging.warning(f"[{CONTEXT}] cursor not set")
+            return
+        
+        self.cursor.execute(f"select * from {DB_RELAY_SENSORS};")
+        relay_sensors = self.cursor.fetchall()
+        
+        if relay_sensors:
+            sensors = []
+            for sensor in relay_sensors:
+                if len(sensor) == 2:
+                    sensors.append({ 'relay': sensor[0], 'channel': sensor[1] })
+                else:
+                    logging.warning(f"[{CONTEXT}] relay sensors have incorrect format in db") 
+                
+            return sensors
+        else:
+            logging.warning(f"[{CONTEXT}] relay sensors cannot be found in db") 
         
     def get_value(self, name):
         if not self.cursor:

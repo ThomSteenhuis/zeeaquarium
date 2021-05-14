@@ -58,7 +58,7 @@ try:
         else:
             logging.warning(f"[{CONTEXT}] invalid measurement")
             
-        if len(measurements_avg) >= 100:
+        if len(measurements_avg) >= 20:
             repo.set_value(CONTEXT, round(sum(measurements_avg) / len(measurements_avg), 2))
             measurements_avg = []
         
