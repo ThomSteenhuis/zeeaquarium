@@ -73,7 +73,7 @@ try:
 except KeyboardInterrupt:
     pass
 except:
-    logging.error(f"[{CONTEXT}] unknown error")
+    logging.exception(f"[{CONTEXT}] general error")
 finally:
     device_repo.set_value(ATO, False)
     device_repo.close_connection()

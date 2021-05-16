@@ -57,7 +57,7 @@ try:
 except KeyboardInterrupt:
     pass
 except:
-    logging.error(f"[{CONTEXT}] unknown error")
+    logging.exception(f"[{CONTEXT}] general error")
 finally:
     sensor_repo.close_connection()
     setting_repo.close_connection()

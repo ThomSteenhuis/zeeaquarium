@@ -88,6 +88,8 @@ try:
     os.system("sudo reboot")
 except KeyboardInterrupt:
     pass
+except:
+    logging.exception(f"[{CONTEXT}] general error")
 finally:
     stop_threads()
     hub_connection.stop()
