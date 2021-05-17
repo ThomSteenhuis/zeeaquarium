@@ -33,6 +33,8 @@ try:
             else:
                 sensor_repo.set_value(f"{device_name}_aan", "0")
         
+        time.sleep(1)
+        
 except KeyboardInterrupt:
     pass
 except:

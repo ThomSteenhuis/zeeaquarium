@@ -30,8 +30,12 @@ class device_repo:
             logging.warning(f"[{CONTEXT}] illegal device")
             return
         
-        self.cursor.execute(f"select name from {DB_DEVICES} where id = {device};")
-        device_name = self.cursor.fetchone()
+        try:
+            self.cursor.execute(f"select name from {DB_DEVICES} where id = {device};")
+            device_name = self.cursor.fetchone()
+        except:
+            logging.warning(f"[{CONTEXT}] db query failed")
+            device_name = None
         
         if device_name and len(device_name) == 1:
             return device_name[0]
@@ -43,8 +47,12 @@ class device_repo:
             logging.warning(f"[{CONTEXT}] cursor not set")
             return
         
-        self.cursor.execute(f"select name from {DB_DEVICES};")
-        device_names = self.cursor.fetchall()
+        try:
+            self.cursor.execute(f"select name from {DB_DEVICES};")
+            device_names = self.cursor.fetchall()
+        except:
+            logging.warning(f"[{CONTEXT}] db query failed")
+            device_names = None
         
         if device_names:
             names = []
@@ -64,8 +72,12 @@ class device_repo:
             return
         
         relay = self.get_relay(name)
-        self.cursor.execute(f"select default_value from {DB_RELAY_DEFAULT} where relay = {relay};")
-        pin = self.cursor.fetchone()
+        try:
+            self.cursor.execute(f"select default_value from {DB_RELAY_DEFAULT} where relay = {relay};")
+            pin = self.cursor.fetchone()
+        except:
+            logging.warning(f"[{CONTEXT}] db query failed")
+            pin = None
         
         if pin and len(pin) == 1:
             return pin[0]
@@ -81,8 +93,12 @@ class device_repo:
             return
         
         relay = self.get_relay(name)
-        self.cursor.execute(f"select pin from {DB_RELAY_PIN} where relay = {relay};")
-        pin = self.cursor.fetchone()
+        try:
+            self.cursor.execute(f"select pin from {DB_RELAY_PIN} where relay = {relay};")
+            pin = self.cursor.fetchone()
+        except:
+            logging.warning(f"[{CONTEXT}] db query failed")
+            pin = None
         
         if pin and len(pin) == 1:
             return pin[0]
@@ -97,8 +113,12 @@ class device_repo:
             logging.warning(f"[{CONTEXT}] illegal name")
             return
         
-        self.cursor.execute(f"select relay from {DB_DEVICES} left join {DB_DEVICE_RELAY} on {DB_DEVICES}.id = {DB_DEVICE_RELAY}.id where name = '{name}';")
-        device_relay = self.cursor.fetchone()
+        try:
+            self.cursor.execute(f"select relay from {DB_DEVICES} left join {DB_DEVICE_RELAY} on {DB_DEVICES}.id = {DB_DEVICE_RELAY}.id where name = '{name}';")
+            device_relay = self.cursor.fetchone()
+        except:
+            logging.warning(f"[{CONTEXT}] db query failed")
+            device_relay = None
         
         if device_relay and len(device_relay) == 1:
             return device_relay[0]
@@ -113,8 +133,12 @@ class device_repo:
             logging.warning(f"[{CONTEXT}] illegal relay")
             return
         
-        self.cursor.execute(f"select id from {DB_DEVICE_RELAY} where relay = {relay};")
-        device = self.cursor.fetchone()
+        try:
+            self.cursor.execute(f"select id from {DB_DEVICE_RELAY} where relay = {relay};")
+            device = self.cursor.fetchone()
+        except:
+            logging.warning(f"[{CONTEXT}] db query failed")
+            device = None
         
         if device and len(device) == 1:
             return device[0]
@@ -126,8 +150,12 @@ class device_repo:
             logging.warning(f"[{CONTEXT}] cursor not set")
             return
         
-        self.cursor.execute(f"select * from {DB_RELAY_SENSORS};")
-        relay_sensors = self.cursor.fetchall()
+        try:
+            self.cursor.execute(f"select * from {DB_RELAY_SENSORS};")
+            relay_sensors = self.cursor.fetchall()
+        except:
+            logging.warning(f"[{CONTEXT}] db query failed")
+            relay_sensors = None
         
         if relay_sensors:
             sensors = []
@@ -149,9 +177,13 @@ class device_repo:
             logging.warning(f"[{CONTEXT}] illegal name")
             return
         
-        self.cursor.execute(f"select value from {DB_DEVICES} left join {DB_DEVICE_VALUES} on {DB_DEVICES}.id = {DB_DEVICE_VALUES}.id where name = '{name}';")
-        device_value = self.cursor.fetchone()
-        
+        try:
+            self.cursor.execute(f"select value from {DB_DEVICES} left join {DB_DEVICE_VALUES} on {DB_DEVICES}.id = {DB_DEVICE_VALUES}.id where name = '{name}';")
+            device_value = self.cursor.fetchone()
+        except:
+            logging.warning(f"[{CONTEXT}] db query failed")
+            device_value = None
+            
         if device_value and len(device_value) == 1:
             if device_value[0] == 0:
                 return False
@@ -170,9 +202,12 @@ class device_repo:
         if value is None or not isinstance(value, bool):            
             logging.warning(f"[{CONTEXT}] illegal value")
             return
-        
-        self.cursor.execute(f"select id from {DB_DEVICES} where name = '{name}';")
-        device_id = self.cursor.fetchone()
+        try:
+            self.cursor.execute(f"select id from {DB_DEVICES} where name = '{name}';")
+            device_id = self.cursor.fetchone()
+        except:
+            logging.warning(f"[{CONTEXT}] db query failed")
+            device_id = None
         
         if not device_id or not len(device_id) == 1:
             logging.warning(f"[{CONTEXT}] device {name} could not be found in db")

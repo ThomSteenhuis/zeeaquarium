@@ -25,8 +25,12 @@ class setting_repo:
             logging.warning(f"[{CONTEXT}] illegal name")
             return
         
-        self.cursor.execute(f"select value from {DB_SETTINGS} left join {DB_SETTING_VALUES} on {DB_SETTINGS}.id = {DB_SETTING_VALUES}.id where name = '{name}';")
-        setting_value_row = self.cursor.fetchone()
+        try:
+            self.cursor.execute(f"select value from {DB_SETTINGS} left join {DB_SETTING_VALUES} on {DB_SETTINGS}.id = {DB_SETTING_VALUES}.id where name = '{name}';")
+            setting_value_row = self.cursor.fetchone()
+        except:
+            logging.warning(f"[{CONTEXT}] db query failed")
+            setting_value_row = None
         
         if setting_value_row and len(setting_value_row) == 1:
             return setting_value_row[0]            
@@ -44,8 +48,12 @@ class setting_repo:
             logging.warning(f"[{CONTEXT}] illegal value")
             return
         
-        self.cursor.execute(f"select id from {DB_SETTINGS} where name = '{name}';")
-        setting_id = self.cursor.fetchone()
+        try:
+            self.cursor.execute(f"select id from {DB_SETTINGS} where name = '{name}';")
+            setting_id = self.cursor.fetchone()
+        except:
+            logging.warning(f"[{CONTEXT}] db query failed")
+            setting_id = None
         
         if not setting_id or not len(setting_id) == 1:
             logging.warning(f"[{CONTEXT}] setting {name} could not be found in db")

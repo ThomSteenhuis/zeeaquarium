@@ -26,8 +26,12 @@ class sensor_repo:
             logging.warning(f"[{CONTEXT}] cursor not set")
             return
         
-        self.cursor.execute(f"select name from {DB_SENSORS};")
-        sensor_names = self.cursor.fetchall()
+        try:
+            self.cursor.execute(f"select name from {DB_SENSORS};")
+            sensor_names = self.cursor.fetchall()
+        except:
+            logging.warning(f"[{CONTEXT}] db query failed")
+            sensor_names = None
         
         if sensor_names:
             names = []
@@ -46,8 +50,12 @@ class sensor_repo:
             logging.warning(f"[{CONTEXT}] illegal name")
             return
         
-        self.cursor.execute(f"select value, datetime from {DB_SENSORS} left join {DB_SENSOR_VALUES} on {DB_SENSORS}.id = {DB_SENSOR_VALUES}.id where name = '{name}';")
-        sensor_value_row = self.cursor.fetchone()
+        try:
+            self.cursor.execute(f"select value, datetime from {DB_SENSORS} left join {DB_SENSOR_VALUES} on {DB_SENSORS}.id = {DB_SENSOR_VALUES}.id where name = '{name}';")
+            sensor_value_row = self.cursor.fetchone()
+        except:
+            logging.warning(f"[{CONTEXT}] db query failed")
+            sensor_value_row = None
         
         if not sensor_value_row or not len(sensor_value_row) == 2:
             logging.warning(f"[{CONTEXT}] sensor value of {name} could not be found in db")
@@ -80,8 +88,12 @@ class sensor_repo:
             logging.warning(f"[{CONTEXT}] illegal value")
             return
         
-        self.cursor.execute(f"select id from {DB_SENSORS} where name = '{name}';")
-        sensor_id = self.cursor.fetchone()
+        try:
+            self.cursor.execute(f"select id from {DB_SENSORS} where name = '{name}';")
+            sensor_id = self.cursor.fetchone()
+        except:
+            logging.warning(f"[{CONTEXT}] db query failed")
+            sensor_id = None
         
         if not sensor_id or not len(sensor_id) == 1:
             logging.warning(f"[{CONTEXT}] sensor {name} could not be found in db")
