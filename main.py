@@ -3,7 +3,7 @@ import os
 import time
 
 import camera_thread
-import reboot_thread
+import command_thread
 import relay_thread
 import sensor_thread
 import utils
@@ -23,21 +23,21 @@ def left_group(data):
         stop_threads()
         logging.info(f"{CONTEXT} left group: {data}")
 
-def reboot(data):
+def invoke_command(data):
     if data[0] == "reboot":
-        reboot_thread.reboot()
+        command_thread.reboot()
 
 def start_threads():
     set_streaming(True)
     camera_thread.start_thread(hub_connection)
-    reboot_thread.start_thread(hub_connection)
+    command_thread.start_thread(hub_connection)
     relay_thread.start_thread(hub_connection)
     sensor_thread.start_thread(hub_connection)
 
 def stop_threads():
     set_streaming(False)
     camera_thread.stop_thread()
-    reboot_thread.stop_thread()
+    command_thread.stop_thread()
     relay_thread.stop_thread()
     sensor_thread.stop_thread()
 
@@ -79,7 +79,7 @@ try:
                 hub_connection.stop()
                 hub_connection = utils.create_hub_connection(CONTEXT)
                 hub_connection.on("ping", adjust_last_message)
-                hub_connection.on("reboot", reboot)
+                hub_connection.on("command", invoke_command)
                 hub_connection.on("joinedGroup", joined_group)
                 hub_connection.on("leftGroup", left_group)
                 hub_connection.on("switchDevice", relay_thread.add_switch_device)
