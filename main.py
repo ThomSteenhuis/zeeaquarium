@@ -27,6 +27,8 @@ def left_group(data):
 def invoke_command(data):
     if data[0] == "reboot":
         command_thread.reboot()
+    elif data[0] == "feeding_mode":
+        command_thread.trigger_feeding_mode()
 
 def start_threads():
     set_streaming(True)
