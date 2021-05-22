@@ -6,6 +6,7 @@ import camera_thread
 import command_thread
 import relay_thread
 import sensor_thread
+import setting_thread
 import utils
 
 def adjust_last_message(data):
@@ -33,6 +34,7 @@ def start_threads():
     command_thread.start_thread(hub_connection)
     relay_thread.start_thread(hub_connection)
     sensor_thread.start_thread(hub_connection)
+    setting_thread.start_thread(hub_connection)
 
 def stop_threads():
     set_streaming(False)
@@ -40,6 +42,7 @@ def stop_threads():
     command_thread.stop_thread()
     relay_thread.stop_thread()
     sensor_thread.stop_thread()
+    setting_thread.stop_thread()
 
 def set_streaming(on):
     global is_streaming, start_streaming
@@ -84,6 +87,8 @@ try:
                 hub_connection.on("leftGroup", left_group)
                 hub_connection.on("switchDevice", relay_thread.add_switch_device)
                 hub_connection.on("requestDeviceStatus", relay_thread.add_device_status_request)
+                hub_connection.on("setSetting", setting_thread.add_setting_change)
+                hub_connection.on("requestSetting", setting_thread.add_setting_request)
                 hub_connection.start()
             except:
                 logging.warning(f"{CONTEXT} signalR connection problem")

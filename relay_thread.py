@@ -30,7 +30,7 @@ class relay_thread (threading.Thread):
                 status = repo.get_value(device)
                 
                 if status is None:
-                    logging.warning(f"[{CONTEXT}] device status of {device} could not be retrieved from controller")
+                    logging.warning(f"[{CONTEXT}] device status of {device} could not be retrieved from repository")
                 else:
                     send_device_status(device, status)
             

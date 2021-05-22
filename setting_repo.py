@@ -17,6 +17,27 @@ class setting_repo:
         else:
             logging.warning(f"[{CONTEXT}] db connection cannot be made")
     
+    def get_setting_names(self):
+        if not self.cursor:
+            logging.warning(f"[{CONTEXT}] cursor not set")
+            return
+        
+        try:
+            self.cursor.execute(f"select name from {DB_SETTINGS};")
+            setting_names = self.cursor.fetchall()
+        except:
+            logging.warning(f"[{CONTEXT}] db query failed")
+            setting_names = None
+        
+        if setting_names:
+            names = []
+            for name in setting_names:
+                names.append(name[0])
+                
+            return names
+        else:
+            logging.warning(f"[{CONTEXT}] setting names cannot be found in db")
+            
     def get_value(self, name):
         if not self.cursor:
             logging.warning(f"[{CONTEXT}] cursor not set")

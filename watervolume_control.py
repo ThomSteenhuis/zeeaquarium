@@ -13,7 +13,6 @@ FLOATSENSOR = "vlotter"
 WATER_TOPOFF_AT = "water_bijvul_tijdstip"
 WATERVOLUME_TARGET = "watervolume_streefwaarde"
 WATERVOLUME_AVG = "watervolume_avg"
-WATERVOLUME_RESERVOIR = "watervolume_reservoir"
 MAX_TOPOFF_VOLUME = 2
 VOLUME_PM = 1.4
 
@@ -35,9 +34,12 @@ try:
         now = dt.datetime.now().time()
         
         if now >= water_topoff_at and old < water_topoff_at:
-            watervolume_target = float(setting_repo.get_value(WATERVOLUME_TARGET))
-            watervolume_current = float(sensor_repo.get_value(WATERVOLUME_AVG, 3600))
-            watervolume_reservoir = float(sensor_repo.get_value(WATERVOLUME_RESERVOIR, 3600))
+            try: 
+                watervolume_target = float(setting_repo.get_value(WATERVOLUME_TARGET))
+                watervolume_current = float(sensor_repo.get_value(WATERVOLUME_AVG, 3600))
+            except ValueError:
+                logging.warning(f"[{CONTEXT}] cannot convert value to floating point number")
+                continue
             
             if not watervolume_target:
                 logging.warning(f"[{CONTEXT}] target watervolume could be retrieved")
@@ -46,14 +48,6 @@ try:
             if not watervolume_current:
                 logging.warning(f"[{CONTEXT}] current watervolume could be retrieved")
                 continue
-            
-            if not watervolume_reservoir or watervolume_reservoir > 22:
-                logging.warning(f"[{CONTEXT}] reservoir watervolume could be retrieved")
-                continue             
-            
-            if watervolume_reservoir < 2:
-                logging.warning(f"[{CONTEXT}] reservoir almost empty")
-                continue   
             
             watervolume_topoff = min(2, watervolume_target - watervolume_current)
             
