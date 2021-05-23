@@ -59,7 +59,7 @@ def time_diff(start, end):
     return end - start
 
 def parse_string_to_time(context, time_string):
-    if not len(time_string) == 4:
+    if time_string is None or not isinstance(time_string, str) not len(time_string) == 4:
         logging.warning(f"[{context}] cannot parse {time_string} to time")
         return
     
