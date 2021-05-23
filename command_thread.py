@@ -1,3 +1,4 @@
+import logging
 import os
 import threading
 import time
@@ -17,7 +18,10 @@ class command_thread (threading.Thread):
             if reboot_triggered:
                 os.system("sudo reboot")
             
+            global feeding_mode_triggered
             if feeding_mode_triggered:
+                feeding_mode_triggered = False
+                
                 utils.retry_if_none(lambda : repo.set_value("pomp_rechts", False))
                 time.sleep(0.5)
                 utils.retry_if_none(lambda : repo.set_value("pomp_links", False))
@@ -27,6 +31,7 @@ class command_thread (threading.Thread):
                 utils.retry_if_none(lambda : repo.set_value("pomp_rechts", True))
                 time.sleep(0.5)
                 utils.retry_if_none(lambda : repo.set_value("pomp_links", True))
+                break
             
             time.sleep(1)
 
@@ -52,9 +57,11 @@ def stop_thread():
     is_streaming = False
     
 def reboot():
+    logging.info(f"[{CONTEXT}] reboot triggered")
     global reboot_triggered
     reboot_triggered = True
 
 def trigger_feeding_mode():
+    logging.info(f"[{CONTEXT}] feeding mode triggered")
     global feeding_mode_triggered
     feeding_mode_triggered = True
