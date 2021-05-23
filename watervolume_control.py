@@ -14,7 +14,7 @@ WATER_TOPOFF_AT = "water_bijvul_tijdstip"
 WATERVOLUME_TARGET = "watervolume_streefwaarde"
 WATERVOLUME_AVG = "watervolume_avg"
 MAX_TOPOFF_VOLUME = 2
-VOLUME_PM = 1.4
+VOLUME_PM = 0.5
 
 utils.setup_logging(CONTEXT)
 device_repo = dr.device_repo()
@@ -31,6 +31,11 @@ try:
             logging.warning(f"[{CONTEXT}] water level too high")
         
         water_topoff_at = utils.parse_string_to_time(CONTEXT, setting_repo.get_value(WATER_TOPOFF_AT))
+        
+        if water_topoff_at is None:
+            logging.warning(f"[{CONTEXT}] water topof time could not be retrieved")
+            continue
+        
         now = dt.datetime.now().time()
         
         if now >= water_topoff_at and old < water_topoff_at:
