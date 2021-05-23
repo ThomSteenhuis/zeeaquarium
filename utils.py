@@ -113,3 +113,13 @@ def insert_db_value(connection, table, id_column, id_value, column, value):
     cursor = connection.cursor()
     cursor.execute("update " + table + " set " + column + " = " + value + " where "+ id_column + " = " + id_value)
     connection.commit()
+    
+def retry_if_none(func, times = 3):
+    outcome = None
+    cnt = 0
+    
+    while outcome is None and cnt < times:
+        outcome = func()
+        cnt += 1
+    
+    return outcome

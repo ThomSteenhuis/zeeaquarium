@@ -25,23 +25,23 @@ old = dt.datetime.now().time()
 
 try:
     while True:
-        device_repo.set_value(ATO, False)
+        utils.retry_if_none(lambda: device_repo.set_value(ATO, False))
         
-        if sensor_repo.get_value(FLOATSENSOR, 0) == "1":
+        if utils.retry_if_none(lambda: sensor_repo.get_value(FLOATSENSOR, 0)) == "1":
             logging.warning(f"[{CONTEXT}] water level too high")
         
-        water_topoff_at = utils.parse_string_to_time(CONTEXT, setting_repo.get_value(WATER_TOPOFF_AT))
+        water_topoff_at = utils.parse_string_to_time(CONTEXT, utils.retry_if_none(lambda: setting_repo.get_value(WATER_TOPOFF_AT)))
         
         if water_topoff_at is None:
-            logging.warning(f"[{CONTEXT}] water topof time could not be retrieved")
+            logging.warning(f"[{CONTEXT}] water topoff time could not be retrieved")
             continue
         
         now = dt.datetime.now().time()
         
         if now >= water_topoff_at and old < water_topoff_at:
             try: 
-                watervolume_target = float(setting_repo.get_value(WATERVOLUME_TARGET))
-                watervolume_current = float(sensor_repo.get_value(WATERVOLUME_AVG, 3600))
+                watervolume_target = float(utils.retry_if_none(setting_repo.get_value(WATERVOLUME_TARGET)))
+                watervolume_current = float(utils.retry_if_none(sensor_repo.get_value(WATERVOLUME_AVG, 3600)))
             except ValueError:
                 logging.warning(f"[{CONTEXT}] cannot convert value to floating point number")
                 continue
@@ -61,9 +61,9 @@ try:
             else:            
                 time_topoff = 60 * watervolume_topoff / VOLUME_PM
                 
-                device_repo.set_value(ATO, True)            
+                utils.retry_if_none(lambda: device_repo.set_value(ATO, True))            
                 time.sleep(time_topoff)
-                device_repo.set_value(ATO, False)
+                utils.retry_if_none(lambda: device_repo.set_value(ATO, False))
                 
                 logging.info(f"[{CONTEXT}] topped off {round(watervolume_topoff, 1)}L")
         
@@ -74,6 +74,6 @@ except KeyboardInterrupt:
 except:
     logging.exception(f"[{CONTEXT}] general error")
 finally:
-    device_repo.set_value(ATO, False)
+    utils.retry_if_none(lambda: device_repo.set_value(ATO, False))
     device_repo.close_connection()
     setting_repo.close_connection()

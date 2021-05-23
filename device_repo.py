@@ -218,6 +218,7 @@ class device_repo:
             
             self.cursor.execute(f"update {DB_DEVICE_VALUES} set value = {val} where id = '{device_id[0]}'")
             self.conn.commit()
+            return True
         except:
             logging.warning(f"[{CONTEXT}] cannot insert device value in db")
 

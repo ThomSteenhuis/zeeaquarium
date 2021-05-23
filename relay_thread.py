@@ -3,6 +3,7 @@ import threading
 import time
 
 import device_repo as dr
+import utils
 
 class relay_thread (threading.Thread):
     
@@ -14,12 +15,12 @@ class relay_thread (threading.Thread):
         
         device_names = []
         device_statuses = {}
-        for name in repo.get_device_names():
+        for name in utils.retry_if_none(lambda : repo.get_device_names()):
             device_names.append(name)
             
         while is_streaming:
             for name in device_names:
-                value = repo.get_value(name)
+                value = utils.retry_if_none(lambda : repo.get_value(name))
                 
                 if not value is None and value != device_statuses.get(name):
                     add_device_status_request([name])
@@ -27,7 +28,7 @@ class relay_thread (threading.Thread):
                     
             if len(pending_device_status_requests) > 0:
                 device = pending_device_status_requests.pop(0)
-                status = repo.get_value(device)
+                status = utils.retry_if_none(lambda : repo.get_value(device))
                 
                 if status is None:
                     logging.warning(f"[{CONTEXT}] device status of {device} could not be retrieved from repository")
@@ -38,7 +39,7 @@ class relay_thread (threading.Thread):
                 switch_data = pending_switch_devices.pop(0)
                 
                 on = switch_data["on"] != "False"
-                repo.set_value(switch_data["device"], on)
+                utils.retry_if_none(lambda : repo.set_value(switch_data["device"], on))
                     
                 add_device_status_request([switch_data["device"]])
             

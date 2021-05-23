@@ -18,7 +18,7 @@ try:
         temp = utils.read_temp(0, "[" + CONTEXT + "]")
 
         if temp and temp > 15 and temp < 35:
-            repo.set_value(CONTEXT, temp)
+            utils.retry_if_none(lambda : repo.set_value(CONTEXT, temp))
         else:
             logging.warning(f"[{CONTEXT}] invalid measurement")
         

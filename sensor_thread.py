@@ -15,10 +15,10 @@ class sensor_thread (threading.Thread):
         repo = sr.sensor_repo()
         
         while is_streaming:
-            sensor_names = repo.get_sensor_names()
+            sensor_names = utils.retry_if_none(lambda : repo.get_sensor_names())
             
             for name in sensor_names:
-                value = repo.get_value(name)
+                value = utils.retry_if_none(lambda : repo.get_value(name))
         
                 if value:                    
                     try:

@@ -83,6 +83,7 @@ class setting_repo:
         try:
             self.cursor.execute(f"update {DB_SETTING_VALUES} set value = \"{str(value)}\" where id = {setting_id[0]}")
             self.conn.commit()
+            return True
         except:
             logging.warning(f"[{CONTEXT}] cannot insert measurement in db")
 

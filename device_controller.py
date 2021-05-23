@@ -12,8 +12,8 @@ utils.setup_logging(CONTEXT)
 repo = dr.device_repo()
 
 pins = []
-for name in repo.get_device_names():
-    pins.append({ "name": name, "pin": repo.get_pin(name), "default": repo.get_default(name) })
+for name in utils.retry_if_none(lambda : repo.get_device_names()):
+    pins.append({ "name": name, "pin": utils.retry_if_none(lambda : repo.get_pin(name)), "default": utils.retry_if_none(lambda : repo.get_default(name)) })
 
 try:
     GPIO.setmode(GPIO.BOARD)
@@ -22,7 +22,7 @@ try:
     
     while True:
         for p in pins:
-            value = repo.get_value(p["name"])
+            value = utils.retry_if_none(lambda : repo.get_value(p["name"]))
         
             if value is None or not isinstance(value, bool):
                 logging.warning(f"[{CONTEXT}] illegal value")

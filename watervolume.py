@@ -56,12 +56,12 @@ try:
         
         if not volume is None:
             measurements_avg.append(volume)
-            repo.set_value(CONTEXT, volume)
+            utils.retry_if_none(lambda : repo.set_value(CONTEXT, volume))
         else:
             logging.warning(f"[{CONTEXT}] invalid measurement")
         
         if len(measurements_avg) >= 100:
-            repo.set_value(WATERVOLUME_AVG, round(sum(measurements_avg) / len(measurements_avg), 2))
+            utils.retry_if_none(lambda : repo.set_value(WATERVOLUME_AVG, round(sum(measurements_avg) / len(measurements_avg), 2)))
             measurements_avg = []
         
 except KeyboardInterrupt:

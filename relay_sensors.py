@@ -15,10 +15,10 @@ adc = MCP3008()
 
 try:
     while True:
-        relay_sensors = device_repo.get_relay_sensors()
+        relay_sensors = utils.retry_if_none(lambda : device_repo.get_relay_sensors())
         for relay_sensor in relay_sensors:
-            device = device_repo.get_device(relay_sensor['relay'])
-            device_name = device_repo.get_device_name(device)
+            device = utils.retry_if_none(lambda : device_repo.get_device(relay_sensor['relay']))
+            device_name = utils.retry_if_none(lambda : device_repo.get_device_name(device))
             
             measurements = []
             while len(measurements) < 1000:
@@ -29,9 +29,9 @@ try:
             value = sum(measurements[940:990]) / len(measurements[940:990]) > 0.9
             
             if value:
-                sensor_repo.set_value(f"{device_name}_aan", "1")
+                utils.retry_if_none(lambda : sensor_repo.set_value(f"{device_name}_aan", "1"))
             else:
-                sensor_repo.set_value(f"{device_name}_aan", "0")
+                utils.retry_if_none(lambda : sensor_repo.set_value(f"{device_name}_aan", "0"))
         
         time.sleep(1)
         

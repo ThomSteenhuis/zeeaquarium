@@ -19,8 +19,8 @@ old = dt.datetime.now().time()
 
 try:
     while True:
-        lights_on_at = utils.parse_string_to_time(CONTEXT, setting_repo.get_value(LIGHTS_ON))
-        lights_off_at = utils.parse_string_to_time(CONTEXT, setting_repo.get_value(LIGHTS_OFF))
+        lights_on_at = utils.parse_string_to_time(CONTEXT, utils.retry_if_none(lambda : setting_repo.get_value(LIGHTS_ON)))
+        lights_off_at = utils.parse_string_to_time(CONTEXT, utils.retry_if_none(lambda : setting_repo.get_value(LIGHTS_OFF)))
         
         if lights_on_at is None or lights_off_at is None:
             logging.warning(f"[{CONTEXT}] lights on/off time could be retrieved")
@@ -29,10 +29,10 @@ try:
         now = dt.datetime.now().time()
         
         if (now >= lights_on_at and old < lights_on_at):
-            device_repo.set_value(LIGHT, True)            
+            utils.retry_if_none(lambda : device_repo.set_value(LIGHT, True))            
         
         if (now >= lights_off_at and old < lights_off_at):
-            device_repo.set_value(LIGHT, False)
+            utils.retry_if_none(lambda : device_repo.set_value(LIGHT, False))
         
         old = now
         time.sleep(1)

@@ -21,12 +21,12 @@ try:
             high_level_cnt += 1
         else:
             time.sleep(5)   
-            repo.set_value(CONTEXT, "0")
+            utils.retry_if_none(lambda : repo.set_value(CONTEXT, "0"))
                 
             high_level_cnt = 0
         
         if high_level_cnt > 100:
-            repo.set_value(CONTEXT, "1")            
+            utils.retry_if_none(lambda : repo.set_value(CONTEXT, "1"))            
         
         time.sleep(0.1)    
 except KeyboardInterrupt:

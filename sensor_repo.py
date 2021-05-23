@@ -102,6 +102,7 @@ class sensor_repo:
         try:
             self.cursor.execute(f"update {DB_SENSOR_VALUES} set value = {str(value)}, datetime = datetime('now') where id = {sensor_id[0]}")
             self.conn.commit()
+            return True
         except:
             logging.warning(f"[{CONTEXT}] cannot insert measurement in db")
 

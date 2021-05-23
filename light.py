@@ -24,7 +24,7 @@ try:
         light = round(sum(measurements[75:225]) / (150 * 10.23), 2)
         
         if not light is None:
-            repo.set_value(CONTEXT, light)
+            utils.retry_if_none(lambda : repo.set_value(CONTEXT, light))
         else:
             logging.warning(f"[{CONTEXT}] invalid measurement")
 except KeyboardInterrupt:

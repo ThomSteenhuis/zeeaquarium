@@ -3,6 +3,7 @@ import threading
 import time
 
 import setting_repo as setr
+import utils
 
 class setting_thread (threading.Thread):
     
@@ -14,12 +15,12 @@ class setting_thread (threading.Thread):
         
         setting_names = []
         setting_values = {}
-        for name in repo.get_setting_names():
+        for name in utils.retry_if_none(lambda : repo.get_setting_names()):
             setting_names.append(name)
             
         while is_streaming:
             for name in setting_names:
-                value = repo.get_value(name)
+                value = utils.retry_if_none(lambda : repo.get_value(name))
                 
                 if not value is None and value != setting_values.get(name):
                     add_setting_request([name])
@@ -27,7 +28,7 @@ class setting_thread (threading.Thread):
                     
             if len(pending_setting_requests) > 0:
                 setting = pending_setting_requests.pop(0)
-                value = repo.get_value(setting)
+                value = utils.retry_if_none(lambda : repo.get_value(setting))
                 
                 if value is None:
                     logging.warning(f"[{CONTEXT}] setting status of {setting} could not be retrieved from repository")
@@ -37,7 +38,7 @@ class setting_thread (threading.Thread):
             if len(pending_setting_changes) > 0:
                 setting_data = pending_setting_changes.pop(0)
                 
-                repo.set_value(setting_data["setting"], setting_data["value"])
+                utils.retry_if_none(lambda : repo.set_value(setting_data["setting"], setting_data["value"]))
                     
                 add_setting_request([setting_data["setting"]])
             

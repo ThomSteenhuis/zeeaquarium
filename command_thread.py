@@ -3,6 +3,7 @@ import threading
 import time
 
 import device_repo as dr
+import utils
 
 class command_thread (threading.Thread):
     
@@ -17,15 +18,15 @@ class command_thread (threading.Thread):
                 os.system("sudo reboot")
             
             if feeding_mode_triggered:
-                repo.set_value("pomp_rechts", False);
+                utils.retry_if_none(lambda : repo.set_value("pomp_rechts", False))
                 time.sleep(0.5)
-                repo.set_value("pomp_links", False);
+                utils.retry_if_none(lambda : repo.set_value("pomp_links", False))
                 
                 time.sleep(120)
                 
-                repo.set_value("pomp_rechts", True);
+                utils.retry_if_none(lambda : repo.set_value("pomp_rechts", True))
                 time.sleep(0.5)
-                repo.set_value("pomp_links", True);
+                utils.retry_if_none(lambda : repo.set_value("pomp_links", True))
             
             time.sleep(1)
 

@@ -48,7 +48,7 @@ try:
             else:
                 logging.warning(f"[{CONTEXT}] invalid measurement")
                 
-            time.sleep(0.01)
+            time.sleep(0.005)
         
         measurements.sort()
         volume = round(sum(measurements[75:225]) / 150, 2)
@@ -59,7 +59,7 @@ try:
             logging.warning(f"[{CONTEXT}] invalid measurement")
             
         if len(measurements_avg) >= 20:
-            repo.set_value(CONTEXT, round(sum(measurements_avg) / len(measurements_avg), 2))
+            utils.retry_if_none(lambda : repo.set_value(CONTEXT, round(sum(measurements_avg) / len(measurements_avg), 2)))
             measurements_avg = []
         
 except KeyboardInterrupt:
