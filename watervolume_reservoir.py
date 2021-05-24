@@ -25,7 +25,6 @@ GPIO.output(PIN_TRIGGER, GPIO.LOW)
 time.sleep(2)
 
 try:
-    measurements_avg = []
     while True:
         measurements = []
         while len(measurements) < 300:                
@@ -54,13 +53,9 @@ try:
         volume = round(sum(measurements[75:225]) / 150, 2)
         
         if not volume is None:
-            measurements_avg.append(volume);
+            utils.retry_if_none(lambda : repo.set_value(CONTEXT, volume))
         else:
             logging.warning(f"[{CONTEXT}] invalid measurement")
-            
-        if len(measurements_avg) >= 20:
-            utils.retry_if_none(lambda : repo.set_value(CONTEXT, round(sum(measurements_avg) / len(measurements_avg), 2)))
-            measurements_avg = []
         
 except KeyboardInterrupt:
     pass
