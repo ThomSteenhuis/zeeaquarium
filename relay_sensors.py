@@ -26,7 +26,7 @@ try:
                 time.sleep(0.0001)
                 
             measurements.sort()
-            value = sum(measurements[940:990]) / len(measurements[940:990]) > 0.9
+            value = sum(measurements[500:990]) / 490 > sum(measurements[10:500]) / 490 + 0.5
             
             if value:
                 utils.retry_if_none(lambda : sensor_repo.set_value(f"{device_name}_aan", "1"))

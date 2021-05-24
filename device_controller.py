@@ -19,6 +19,12 @@ try:
     GPIO.setmode(GPIO.BOARD)
     for p in pins:
         GPIO.setup(p["pin"], GPIO.OUT)
+        time.sleep(0.2)
+        GPIO.output(p["pin"], GPIO.HIGH)
+        time.sleep(0.2)
+        GPIO.output(p["pin"], GPIO.LOW)
+    
+    time.sleep(0.2)
     
     while True:
         for p in pins:
@@ -36,7 +42,7 @@ try:
                 else:
                     GPIO.output(p["pin"], GPIO.HIGH) # Off
         
-        time.sleep(0.1)          
+        time.sleep(0.2)          
 except KeyboardInterrupt:
     pass
 except:

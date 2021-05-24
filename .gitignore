@@ -1,4 +1,5 @@
 log/*
+notifications/*
 secrets/*
 __pycache__/*
 **/*.log

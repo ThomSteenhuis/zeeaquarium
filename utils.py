@@ -121,5 +121,6 @@ def retry_if_none(func, times = 3):
     while outcome is None and cnt < times:
         outcome = func()
         cnt += 1
+        time.sleep(0.1)
     
     return outcome
