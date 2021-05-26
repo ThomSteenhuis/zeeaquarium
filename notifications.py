@@ -66,8 +66,13 @@ def get_variable(variable):
     
     if variable.get('type') == 'current_time':
         now = dt.datetime.now()
+        hour = str(now.hour)
+        minute = str(now.minute)
         
-        return float(str(now.hour) + str(now.minute))
+        if len(minute) == 1:
+            return float(hour + '0' + minute)
+        else:
+            return float(hour + minute)
     
     if variable.get('type') == 'sensor':
         value = utils.retry_if_none(lambda: sensor_repo.get_value(variable.get('value')))
