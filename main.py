@@ -1,5 +1,6 @@
 import logging
 import os
+import requests
 import time
 
 import camera_thread
