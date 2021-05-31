@@ -58,29 +58,30 @@ def set_streaming(on):
 CONTEXT = "[main]"
 REBOOT_AFTER_TIME_WITHOUT_CONNECTION = 900
 STARTUP_TIME = 30
+PAUZE_BEFORE_REBOOT = 30
 MAX_STREAMING_TIME = 30
 PING_INTERVAL = 10
 
-hub_connection = utils.create_hub_connection(CONTEXT)
-last_message = time.time()
-start_streaming = None
-is_streaming = False
+try:
+    hub_connection = utils.create_hub_connection(CONTEXT)
+    last_message = time.time()
+    start_streaming = None
+    is_streaming = False
 
-time.sleep(STARTUP_TIME)
+    time.sleep(STARTUP_TIME)
 
-utils.setup_logging("main")
+    utils.setup_logging("main")
 
-token = None
-while token is None:
-    try:
-        token = utils.login()
-    except ConnectionError:
-        logging.warning(f"[{CONTEXT}] connection error while logging in")
-    time.sleep(1)
+    token = None
+    while token is None:
+        try:
+            token = utils.login()
+        except ConnectionError:
+            logging.warning(f"[{CONTEXT}] connection error while logging in")
+        time.sleep(1)
 
-url = utils.read_secret("connection_url")
+    url = utils.read_secret("connection_url")
 
-try:    
     while utils.time_diff(last_message, time.time()) < REBOOT_AFTER_TIME_WITHOUT_CONNECTION:
                
         if is_streaming and utils.time_diff(start_streaming, time.time()) > MAX_STREAMING_TIME:
@@ -114,13 +115,20 @@ try:
         time.sleep(PING_INTERVAL)
             
     logging.info(f"{CONTEXT} no messages received for {REBOOT_AFTER_TIME_WITHOUT_CONNECTION} seconds")
-    logging.info(f"{CONTEXT} rebooting")
     
+    time.sleep(PAUZE_BEFORE_REBOOT)
+    
+    logging.info(f"{CONTEXT} rebooting")
     os.system("sudo reboot")
 except KeyboardInterrupt:
     pass
 except:
-    logging.exception(f"[{CONTEXT}] general error")
+    logging.exception(f"{CONTEXT} general error")
+    
+    time.sleep(PAUZE_BEFORE_REBOOT)
+    
+    logging.info(f"{CONTEXT} rebooting")
+    os.system("sudo reboot")
 finally:
     stop_threads()
     hub_connection.stop()
