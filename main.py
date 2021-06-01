@@ -77,7 +77,7 @@ try:
         try:
             token = utils.login()
         except ConnectionError:
-            logging.warning(f"[{CONTEXT}] connection error while logging in")
+            logging.warning(f"{CONTEXT} connection error while logging in")
         time.sleep(1)
 
     url = utils.read_secret("connection_url")
@@ -87,10 +87,13 @@ try:
         if is_streaming and utils.time_diff(start_streaming, time.time()) > MAX_STREAMING_TIME:
             stop_threads()
         
-        r = requests.post(url, headers = {'Authorization': 'Bearer ' + token} )
+        try:
+            r = requests.post(url, headers = {'Authorization': 'Bearer ' + token} )
     
-        if r.status_code != 200:
-            logging.warning(f"[{CONTEXT}] cannot connect via http")
+            if r.status_code != 200:
+                logging.warning(f"{CONTEXT} cannot connect via http")
+        except ConnectionError:
+            logging.warning(f"{CONTEXT} connection error while trying to connect")
         
         try:
             hub_connection.send("ping", ["pong"])             
