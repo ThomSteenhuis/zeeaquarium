@@ -1,6 +1,5 @@
 import logging
 import os
-import requests
 import time
 
 import camera_thread
@@ -56,7 +55,7 @@ def set_streaming(on):
         start_streaming = None
 
 CONTEXT = "[main]"
-REBOOT_AFTER_TIME_WITHOUT_CONNECTION = 900
+REBOOT_AFTER_TIME_WITHOUT_CONNECTION = 450
 STARTUP_TIME = 30
 PAUZE_BEFORE_REBOOT = 30
 MAX_STREAMING_TIME = 30
@@ -72,28 +71,12 @@ try:
 
     utils.setup_logging("main")
 
-    token = None
-    while token is None:
-        try:
-            token = utils.login()
-        except requests.exceptions.RequestException:
-            logging.warning(f"{CONTEXT} connection error while logging in")
-        time.sleep(1)
-
-    url = utils.read_secret("connection_url")
-
     while utils.time_diff(last_message, time.time()) < REBOOT_AFTER_TIME_WITHOUT_CONNECTION:
                
         if is_streaming and utils.time_diff(start_streaming, time.time()) > MAX_STREAMING_TIME:
             stop_threads()
         
-        try:
-            r = requests.post(url, headers = {'Authorization': 'Bearer ' + token} )
-    
-            if r.status_code != 200:
-                logging.warning(f"{CONTEXT} cannot connect via http")
-        except requests.exceptions.RequestException:
-            logging.warning(f"{CONTEXT} connection error while trying to connect")
+        utils.connect()
         
         try:
             hub_connection.send("ping", ["pong"])             

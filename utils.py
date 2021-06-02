@@ -7,6 +7,8 @@ import time
 
 from signalrcore.hub_connection_builder import HubConnectionBuilder
 
+import connect_thread
+
 BASE_DIR_TEMP = "/sys/bus/w1/devices"
 SECRETS_DIR = "/home/pi/Desktop/zeeaquarium/secrets/"
 
@@ -32,10 +34,14 @@ def login():
         json={
             "username": read_secret("login_user"),
             "password": read_secret("login_password")
-            }, verify=False)
+            }, timeout = 3)
     if response.status_code == 200:
         return response.json()["token"]
     raise requests.exceptions.ConnectionError()
+
+def connect():
+    thread = connect_thread.connect_thread()
+    thread.start()
 
 def print_measurement(data):
     print(f"{data}")
