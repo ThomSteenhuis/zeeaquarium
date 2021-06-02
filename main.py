@@ -76,7 +76,7 @@ try:
     while token is None:
         try:
             token = utils.login()
-        except ConnectionError:
+        except requests.exceptions.RequestException:
             logging.warning(f"{CONTEXT} connection error while logging in")
         time.sleep(1)
 
@@ -92,7 +92,7 @@ try:
     
             if r.status_code != 200:
                 logging.warning(f"{CONTEXT} cannot connect via http")
-        except ConnectionError:
+        except requests.exceptions.RequestException:
             logging.warning(f"{CONTEXT} connection error while trying to connect")
         
         try:

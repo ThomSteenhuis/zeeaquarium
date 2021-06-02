@@ -21,7 +21,7 @@ class camera_thread (threading.Thread):
         while token is None:
             try:
                 token = utils.login()
-            except ConnectionError:
+            except requests.exceptions.RequestException:
                 logging.warning(f"[{CONTEXT}] connection error while logging in")
             time.sleep(1)
         
@@ -41,10 +41,14 @@ class camera_thread (threading.Thread):
                 camera.capture(video_stream, format = 'jpeg')
                 
                 byte_array = list(video_stream.getvalue())
-                r = requests.post(url, json = {"screenshot": byte_array}, headers = {'Authorization': 'Bearer ' + token} ) 
                 
-                if r.status_code != 200:
-                    logging.warning(f"[{CONTEXT}] cannot post screenshot via http")
+                try:
+                    r = requests.post(url, json = {"screenshot": byte_array}, headers = {'Authorization': 'Bearer ' + token} ) 
+                    
+                    if r.status_code != 200:
+                        logging.warning(f"[{CONTEXT}] cannot post screenshot via http")
+                except requests.exceptions.RequestException:
+                    logging.warning(f"[{CONTEXT}] connection error while posting screenshot")
         
             camera.stop_preview()
         
