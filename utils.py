@@ -1,6 +1,8 @@
+from dateutil import parser
 import datetime as dt
 import glob
 import logging
+import pytz
 import requests
 import sqlite3
 import time
@@ -39,6 +41,39 @@ def login():
         return response.json()["token"]
     raise requests.exceptions.ConnectionError()
 
+def get_token(context):
+    token = None
+    while token is None:
+        try:
+            token = login()
+        except requests.exceptions.RequestException:
+            logging.warning(f"[{context}] connection error while logging in")
+        time.sleep(1)
+    
+    return token
+
+def get_command(context, command):
+    url = read_secret("command_url")
+    token = get_token(context)
+    
+    response = requests.get(f"{url}?command={command}", headers = {'Authorization': 'Bearer ' + token}, timeout = 3)
+    if response.status_code == 200:
+        return response.json()
+    raise requests.exceptions.ConnectionError()
+
+def command_sent(context, command_name, outdated_after):
+    try:
+        command = get_command(context, command_name)
+        
+        command_date = parser.parse(command["date"])
+        outdated_after = dt.timedelta(seconds = outdated_after)
+        now = pytz.utc.localize(dt.datetime.utcnow())
+        
+        return now - outdated_after < command_date
+    except requests.exceptions.ConnectionError:
+        logging.warning(f"[{context}] could not get {command_name} command via http")
+        return false
+
 def connect():
     thread = connect_thread.connect_thread()
     thread.start()
@@ -52,7 +87,7 @@ def empty_handler(data):
 def create_hub_connection(context):
     hub_connection = HubConnectionBuilder()\
         .with_url(read_secret("hub_url"), options={ "access_token_factory": login })\
-        .configure_logging(logging.INFO)\
+        .configure_logging(logging.DEBUG)\
         .build()
     
     hub_connection.on_open(lambda: logging.info(f"{context} signalR connection is now open"))

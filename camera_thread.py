@@ -17,14 +17,7 @@ class camera_thread (threading.Thread):
     def run(self):
         global thread
         
-        token = None
-        while token is None:
-            try:
-                token = utils.login()
-            except requests.exceptions.RequestException:
-                logging.warning(f"[{CONTEXT}] connection error while logging in")
-            time.sleep(1)
-        
+        token = utils.get_token(CONTEXT)
         url = utils.read_secret("screenshot_url")
         
         with picamera.PiCamera() as camera:
@@ -56,13 +49,11 @@ class camera_thread (threading.Thread):
         
 CONTEXT = "camera"
 
-hub_connection = None
 is_streaming = False
 thread = None
 
-def start_thread(connection):
-    global hub_connection, is_streaming, thread
-    hub_connection = connection
+def start_thread():
+    global is_streaming, thread
     is_streaming = True
     
     if thread is None:

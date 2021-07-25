@@ -15,13 +15,13 @@ class command_thread (threading.Thread):
         repo = dr.device_repo()
         
         while is_streaming:
-            if reboot_triggered:
+            if utils.command_sent(CONTEXT, "reboot", COMMAND_OUTDATED_AFTER):
+                logging.info(f"[{CONTEXT}] reboot triggered")
                 os.system("sudo reboot")
             
-            global feeding_mode_triggered
-            if feeding_mode_triggered:
-                feeding_mode_triggered = False
-                
+            if utils.command_sent(CONTEXT, "feeding_mode", COMMAND_OUTDATED_AFTER):    
+                logging.info(f"[{CONTEXT}] feeding mode triggered")
+    
                 utils.retry_if_none(lambda : repo.set_value("pomp_rechts", False))
                 time.sleep(0.5)
                 utils.retry_if_none(lambda : repo.set_value("pomp_links", False))
@@ -38,15 +38,12 @@ class command_thread (threading.Thread):
         repo.close_connection()
         
 CONTEXT = "command"
+COMMAND_OUTDATED_AFTER = 60
 
-hub_connection = None
 is_streaming = False
-reboot_triggered = False
-feeding_mode_triggered = False
 
-def start_thread(connection):
-    global hub_connection, is_streaming, reboot
-    hub_connection = connection
+def start_thread():
+    global is_streaming, reboot
     is_streaming = True
     
     r = command_thread()
@@ -55,13 +52,3 @@ def start_thread(connection):
 def stop_thread():
     global is_streaming
     is_streaming = False
-    
-def reboot():
-    logging.info(f"[{CONTEXT}] reboot triggered")
-    global reboot_triggered
-    reboot_triggered = True
-
-def trigger_feeding_mode():
-    logging.info(f"[{CONTEXT}] feeding mode triggered")
-    global feeding_mode_triggered
-    feeding_mode_triggered = True
