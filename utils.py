@@ -70,9 +70,9 @@ def command_sent(context, command_name, outdated_after):
         now = pytz.utc.localize(dt.datetime.utcnow())
         
         return now - outdated_after < command_date
-    except requests.exceptions.ConnectionError:
+    except:
         logging.warning(f"[{context}] could not get {command_name} command via http")
-        return false
+        return False
 
 def connect():
     thread = connect_thread.connect_thread()
