@@ -1,4 +1,5 @@
 import logging
+import requests
 import threading
 import time
 
@@ -11,51 +12,36 @@ class setting_thread (threading.Thread):
         threading.Thread.__init__(self)
       
     def run(self):
+        token = utils.get_token(CONTEXT)
         repo = setr.setting_repo()
         
         setting_names = []
         setting_values = {}
+        
         for name in utils.retry_if_none(lambda : repo.get_setting_names()):
             setting_names.append(name)
+            value = utils.retry_if_none(lambda : repo.get_value(name))
+            setting_values[name] = value
+            post_setting(token, name, value)
             
         while is_streaming:
             for name in setting_names:
-                value = utils.retry_if_none(lambda : repo.get_value(name))
-                
-                if not value is None and value != setting_values.get(name):
-                    add_setting_request([name])
+                setting = get_setting(token, name)
+                if not setting is None and setting.get("value") != setting_values.get(name):
+                    utils.retry_if_none(lambda : repo.set_value(name, setting["value"]))
                     setting_values[name] = value
-                    
-            if len(pending_setting_requests) > 0:
-                setting = pending_setting_requests.pop(0)
-                value = utils.retry_if_none(lambda : repo.get_value(setting))
-                
-                if value is None:
-                    logging.warning(f"[{CONTEXT}] setting status of {setting} could not be retrieved from repository")
-                else:
-                    send_setting_value(setting, value)
             
-            if len(pending_setting_changes) > 0:
-                setting_data = pending_setting_changes.pop(0)
-                
-                utils.retry_if_none(lambda : repo.set_value(setting_data["setting"], setting_data["value"]))
-                    
-                add_setting_request([setting_data["setting"]])
-            
-            time.sleep(0.1)
+            time.sleep(1)
         
         repo.close_connection()
 
 CONTEXT = "setting"
+SETTING_OUTDATED_AFTER = 60
 
-hub_connection = None
 is_streaming = False
-pending_setting_requests = []
-pending_setting_changes = []
 
-def start_thread(connection):
-    global hub_connection, is_streaming
-    hub_connection = connection
+def start_thread():
+    global is_streaming
     is_streaming = True
     
     t = setting_thread()
@@ -63,16 +49,27 @@ def start_thread(connection):
     
 def stop_thread():
     global is_streaming
-    is_streaming = False
+    is_streaming = False  
 
-def add_setting_change(data):
-    pending_setting_changes.append({ "setting": data[0], "value": data[1] })
+def get_setting(token, name):
+    url = utils.read_secret("setting_url")
     
-def add_setting_request(data):
-    pending_setting_requests.append(data[0])
-        
-def send_setting_value(setting, value):
     try:
-        hub_connection.send("setting", [setting, str(value)])
-    except ValueError:
-        logging.warning(f"[{CONTEXT}] cannot send signalr message")        
+        r = requests.get(f"{url}?setting={name}", headers = {'Authorization': 'Bearer ' + token}, timeout = 3)
+        if r.status_code == 200:
+            return r.json()
+        
+        logging.warning(f"[{CONTEXT}] could not get {name} setting via http")
+    except requests.exceptions.RequestException:
+        logging.warning(f"[{CONTEXT}] connection error while getting setting")
+
+def post_setting(token, name, value):
+    url = utils.read_secret("setting_url")
+    
+    try:
+        r = requests.post(url, json = {"setting": name, "value": value}, headers = {'Authorization': 'Bearer ' + token}, timeout = 3) 
+        
+        if r.status_code != 200:
+            logging.warning(f"[{CONTEXT}] could not post {name} setting via http")
+    except requests.exceptions.RequestException:
+        logging.warning(f"[{CONTEXT}] connection error while posting setting")

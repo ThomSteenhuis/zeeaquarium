@@ -17,7 +17,7 @@ def start_threads():
     command_thread.start_thread()
     #relay_thread.start_thread()
     sensor_thread.start_thread()
-    #setting_thread.start_thread()
+    setting_thread.start_thread()
 
 def stop_threads():
     set_streaming(False)
@@ -25,7 +25,7 @@ def stop_threads():
     command_thread.stop_thread()
     #relay_thread.stop_thread()
     sensor_thread.stop_thread()
-    #setting_thread.stop_thread()
+    setting_thread.stop_thread()
 
 def set_streaming(on):
     global is_streaming, start_streaming
