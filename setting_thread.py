@@ -12,6 +12,7 @@ class setting_thread (threading.Thread):
         threading.Thread.__init__(self)
       
     def run(self):
+        url = utils.read_secret("setting_url")
         token = utils.get_token(CONTEXT)
         repo = setr.setting_repo()
         
@@ -22,12 +23,12 @@ class setting_thread (threading.Thread):
             setting_names.append(name)
             value = utils.retry_if_none(lambda : repo.get_value(name))
             setting_values[name] = value
-            post_setting(token, name, value)
+            post_setting(url, token, name, value)
             
         while is_streaming:
             for name in setting_names:
-                setting = get_setting(token, name)
-                if not setting is None and setting.get("value") != setting_values.get(name):
+                setting = get_setting(url, token, name)
+                if not setting is None and setting["value"] != setting_values.get(name):
                     utils.retry_if_none(lambda : repo.set_value(name, setting["value"]))
                     setting_values[name] = value
             
@@ -36,7 +37,6 @@ class setting_thread (threading.Thread):
         repo.close_connection()
 
 CONTEXT = "setting"
-SETTING_OUTDATED_AFTER = 60
 
 is_streaming = False
 
@@ -51,9 +51,7 @@ def stop_thread():
     global is_streaming
     is_streaming = False  
 
-def get_setting(token, name):
-    url = utils.read_secret("setting_url")
-    
+def get_setting(url, token, name):    
     try:
         r = requests.get(f"{url}?setting={name}", headers = {'Authorization': 'Bearer ' + token}, timeout = 3)
         if r.status_code == 200:
@@ -63,9 +61,7 @@ def get_setting(token, name):
     except requests.exceptions.RequestException:
         logging.warning(f"[{CONTEXT}] connection error while getting setting")
 
-def post_setting(token, name, value):
-    url = utils.read_secret("setting_url")
-    
+def post_setting(url, token, name, value):    
     try:
         r = requests.post(url, json = {"setting": name, "value": value}, headers = {'Authorization': 'Bearer ' + token}, timeout = 3) 
         

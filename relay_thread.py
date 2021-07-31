@@ -1,4 +1,5 @@
 import logging
+import requests
 import threading
 import time
 
@@ -11,52 +12,38 @@ class relay_thread (threading.Thread):
         threading.Thread.__init__(self)
       
     def run(self):
+        url = utils.read_secret("switch_url")
+        token = utils.get_token(CONTEXT)
         repo = dr.device_repo()
         
-        device_names = []
-        device_statuses = {}
+        switch_names = []
+        switch_statuses = {}
+        
         for name in utils.retry_if_none(lambda : repo.get_device_names()):
-            device_names.append(name)
+            switch_names.append(name)
             
         while is_streaming:
-            for name in device_names:
+            for name in switch_names:
                 value = utils.retry_if_none(lambda : repo.get_value(name))
+                if not value is None and value != switch_statuses.get(name):
+                    post_switch_status(url, token, name, value)
+                    switch_statuses[name] = value                
                 
-                if not value is None and value != device_statuses.get(name):
-                    add_device_status_request([name])
-                    device_statuses[name] = value
-                    
-            if len(pending_device_status_requests) > 0:
-                device = pending_device_status_requests.pop(0)
-                status = utils.retry_if_none(lambda : repo.get_value(device))
+                switch_status = get_switch_status(url, token, name)
+                if not switch_status is None and switch_status["value"] != switch_statuses.get(name):
+                    utils.retry_if_none(lambda : repo.set_value(name, switch_status["value"]))
+                    switch_statuses[name] = value
                 
-                if status is None:
-                    logging.warning(f"[{CONTEXT}] device status of {device} could not be retrieved from repository")
-                else:
-                    send_device_status(device, status)
-            
-            if len(pending_switch_devices) > 0:
-                switch_data = pending_switch_devices.pop(0)
-                
-                on = switch_data["on"] != "False"
-                utils.retry_if_none(lambda : repo.set_value(switch_data["device"], on))
-                    
-                add_device_status_request([switch_data["device"]])
-            
-            time.sleep(0.1)
+            time.sleep(1)
         
         repo.close_connection()
 
 CONTEXT = "relay"
 
-hub_connection = None
 is_streaming = False
-pending_device_status_requests = []
-pending_switch_devices = []
 
-def start_thread(connection):
-    global hub_connection, is_streaming
-    hub_connection = connection
+def start_thread():
+    global is_streaming
     is_streaming = True
     
     r = relay_thread()
@@ -66,14 +53,21 @@ def stop_thread():
     global is_streaming
     is_streaming = False
 
-def add_switch_device(data):
-    pending_switch_devices.append({ "device": data[0], "on": data[1] })
-    
-def add_device_status_request(data):
-    pending_device_status_requests.append(data[0])
-        
-def send_device_status(device, status):
+def get_switch_status(url, token, name):
     try:
-        hub_connection.send("deviceStatus", [device, str(status)])
-    except ValueError:
-        logging.warning(f"[{CONTEXT}] cannot send signalr message")        
+        r = requests.get(f"{url}?deviceSwitch={name}", headers = {'Authorization': 'Bearer ' + token}, timeout = 3)
+        if r.status_code == 200:
+            return r.json()
+        
+        logging.warning(f"[{CONTEXT}] could not get {name} switch status via http")
+    except requests.exceptions.RequestException:
+        logging.warning(f"[{CONTEXT}] connection error while getting switch status")
+
+def post_switch_status(url, token, name, value):    
+    try:
+        r = requests.post(url, json = {"switch": name, "value": value}, headers = {'Authorization': 'Bearer ' + token}, timeout = 3) 
+        
+        if r.status_code != 200:
+            logging.warning(f"[{CONTEXT}] could not post {name} switch status via http")
+    except requests.exceptions.RequestException:
+        logging.warning(f"[{CONTEXT}] connection error while posting switch status")    
