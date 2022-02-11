@@ -124,7 +124,7 @@ url = utils.read_secret("notifications_url")
 
 with open(NOTIFICATION_FILENAME) as notification_rules_file:
     try:
-        send_notification("Controller rebooted!", "Controller was succesfully rebooted, ready to send notifications.")
+        send_notification("Controller herstart!", "Controller is succesvol herstart, klaar om notificaties te versturen.")
         
         rules = parse_rules(json.load(notification_rules_file))
         
