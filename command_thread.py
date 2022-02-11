@@ -19,20 +19,6 @@ class command_thread (threading.Thread):
                 logging.info(f"[{CONTEXT}] reboot triggered")
                 os.system("sudo reboot")
             
-            if utils.command_sent(CONTEXT, "feeding_mode", COMMAND_OUTDATED_AFTER):    
-                logging.info(f"[{CONTEXT}] feeding mode triggered")
-    
-                utils.retry_if_none(lambda : repo.set_value("pomp_rechts", False))
-                time.sleep(0.5)
-                utils.retry_if_none(lambda : repo.set_value("pomp_links", False))
-                
-                time.sleep(120)
-                
-                utils.retry_if_none(lambda : repo.set_value("pomp_rechts", True))
-                time.sleep(0.5)
-                utils.retry_if_none(lambda : repo.set_value("pomp_links", True))
-                break
-            
             time.sleep(1)
 
         repo.close_connection()
