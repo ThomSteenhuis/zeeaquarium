@@ -97,11 +97,14 @@ def get_variable(variable):
             return float(value) + float(addition)
 
 def send_notification(title, body):
-    r = requests.post(url, data = {'title': title, 'body': body}, headers = {'Authorization': 'Bearer ' + token} )
-    logging.info(f"[{CONTEXT}] notification sent (title: {title}, body: {body})")
-    
-    if r.status_code != 200:
-        logging.warning(f"[{CONTEXT}] cannot post notification via http")
+    try:
+        r = requests.post(url, data = {'title': title, 'body': body}, headers = {'Authorization': 'Bearer ' + token} )
+        logging.info(f"[{CONTEXT}] notification sent (title: {title}, body: {body})")
+        
+        if r.status_code != 200:
+            logging.warning(f"[{CONTEXT}] cannot post notification via http")
+    except requests.exceptions.RequestException:
+        logging.warning(f"[{CONTEXT}] connection error while sending notification")
 
 time.sleep(30)
 
