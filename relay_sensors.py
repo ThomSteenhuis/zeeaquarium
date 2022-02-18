@@ -31,6 +31,7 @@ try:
                 time.sleep(0.0001)
                 
             measurements.sort()
+
             value = sum(measurements[500:990]) / 490 > sum(measurements[10:500]) / 490 + device_voltage_threshold
             
             if value:

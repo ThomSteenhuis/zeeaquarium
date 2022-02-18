@@ -189,7 +189,31 @@ class device_repo:
             return sensors
         else:
             logging.warning(f"[{CONTEXT}] relay sensors cannot be found in db") 
+
+    def get_device_relays(self):
+        if not self.cursor:
+            logging.warning(f"[{CONTEXT}] cursor not set")
+            return
         
+        try:
+            self.cursor.execute(f"select * from {DB_DEVICE_RELAY};")
+            device_relays = self.cursor.fetchall()
+        except:
+            logging.warning(f"[{CONTEXT}] db query failed")
+            device_relays = None
+        
+        if device_relays:
+            devices = []
+            for device in device_relays:
+                if len(device) == 2:
+                    devices.append({ 'device': device[0], 'relay': device[1] })
+                else:
+                    logging.warning(f"[{CONTEXT}] device relays have incorrect format in db") 
+                
+            return devices
+        else:
+            logging.warning(f"[{CONTEXT}] device relays cannot be found in db") 
+
     def get_value(self, name):
         if not self.cursor:
             logging.warning(f"[{CONTEXT}] cursor not set")

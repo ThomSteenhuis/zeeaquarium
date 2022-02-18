@@ -12,7 +12,9 @@ utils.setup_logging(CONTEXT)
 repo = dr.device_repo()
 
 pins = []
-for name in utils.retry_if_none(lambda : repo.get_device_names()):
+device_relays = utils.retry_if_none(lambda : repo.get_device_relays())
+for device_relay in device_relays:
+    name = utils.retry_if_none(lambda : repo.get_device_name(device_relay['device']))
     pins.append({ "name": name, "pin": utils.retry_if_none(lambda : repo.get_pin(name)), "default": utils.retry_if_none(lambda : repo.get_default(name)) })
 
 try:
