@@ -196,7 +196,7 @@ class device_repo:
             return
         
         try:
-            self.cursor.execute(f"select * from {DB_DEVICE_RELAY};")
+            self.cursor.execute(f"select * from {DB_DEVICE_RELAY} where relay in (select relay from {DB_RELAY_PIN});")
             device_relays = self.cursor.fetchall()
         except:
             logging.warning(f"[{CONTEXT}] db query failed")
