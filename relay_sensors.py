@@ -1,3 +1,4 @@
+from ADS1115 import ADS1115
 from MCP3008 import MCP3008
 import logging
 import time
@@ -11,7 +12,8 @@ CONTEXT = "relay_sensors"
 utils.setup_logging(CONTEXT)
 device_repo = dr.device_repo()
 sensor_repo = sr.sensor_repo()
-adc = MCP3008()
+ads = ADS1115()
+mcp = MCP3008()
 
 try:
     while True:
@@ -26,13 +28,20 @@ try:
                 device_voltage_threshold = 0.5                
             
             measurements = []
-            while len(measurements) < 1000:
-                measurements.append(adc.read( channel = relay_sensor['channel'] ))
-                time.sleep(0.0001)
-                
-            measurements.sort()
-
-            value = sum(measurements[500:990]) / 490 > sum(measurements[10:500]) / 490 + device_voltage_threshold
+            if relay_sensor['source'] == 'mcp':
+                while len(measurements) < 1000:
+                    measurements.append(mcp.read( channel = relay_sensor['channel'] ))
+                    time.sleep(0.0001)
+                    
+                measurements.sort()
+                value = sum(measurements[500:990]) / 490 > sum(measurements[10:500]) / 490 + device_voltage_threshold
+            else:                
+                while len(measurements) < 100:
+                    measurements.append(ads.read( channel = relay_sensor['channel'] - 8, gain = 16 ))
+                    time.sleep(0.0001)
+                    
+                measurements.sort()
+                value = sum(measurements[50:99]) / 49 > sum(measurements[1:50]) / 49 + device_voltage_threshold
             
             if value:
                 utils.retry_if_none(lambda : sensor_repo.set_value(f"{device_name}_aan", "1"))
@@ -46,6 +55,6 @@ except KeyboardInterrupt:
 except:
     logging.exception(f"[{CONTEXT}] general error")
 finally:
-    adc.close()
+    mcp.close()
     device_repo.close_connection()
     sensor_repo.close_connection()    

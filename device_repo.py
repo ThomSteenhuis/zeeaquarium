@@ -181,8 +181,8 @@ class device_repo:
         if relay_sensors:
             sensors = []
             for sensor in relay_sensors:
-                if len(sensor) == 2:
-                    sensors.append({ 'relay': sensor[0], 'channel': sensor[1] })
+                if len(sensor) == 3:
+                    sensors.append({ 'relay': sensor[0], 'channel': sensor[1], 'source': sensor[2] })
                 else:
                     logging.warning(f"[{CONTEXT}] relay sensors have incorrect format in db") 
                 
