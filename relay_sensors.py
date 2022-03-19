@@ -25,7 +25,7 @@ try:
             
             if not device_voltage_threshold:
                 logging.warning(f"[{CONTEXT}] {device_name} voltage threshold could not be retrieved from repo")
-                device_voltage_threshold = 0.5                
+                device_voltage_threshold = 0.5
             
             measurements = []
             if relay_sensor['source'] == 'mcp':
@@ -34,16 +34,18 @@ try:
                     time.sleep(0.0001)
                     
                 measurements.sort()
-                value = sum(measurements[500:990]) / 490 > sum(measurements[10:500]) / 490 + device_voltage_threshold
+                value = (sum(measurements[500:990]) - sum(measurements[10:500])) / 490
             else:                
                 while len(measurements) < 100:
                     measurements.append(ads.read( channel = relay_sensor['channel'] - 8, gain = 16 ))
                     time.sleep(0.0001)
                     
                 measurements.sort()
-                value = sum(measurements[50:99]) / 49 > sum(measurements[1:50]) / 49 + device_voltage_threshold
+                value = (sum(measurements[50:99]) - sum(measurements[1:50])) / 49
             
-            if value:
+            utils.retry_if_none(lambda : sensor_repo.set_raw_value(f"{device_name}_aan", str(value)))
+            
+            if value >= device_voltage_threshold:
                 utils.retry_if_none(lambda : sensor_repo.set_value(f"{device_name}_aan", "1"))
             else:
                 utils.retry_if_none(lambda : sensor_repo.set_value(f"{device_name}_aan", "0"))
