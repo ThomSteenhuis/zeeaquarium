@@ -10,7 +10,7 @@ CONTEXT = "dosing"
 DOSING_AT = "doseer_tijdstip"
 DOSING_PUMPS = [{"name": "doseerpomp_1", "volume": "doseerpomp_1_volume"}, {"name": "doseerpomp_2", "volume": "doseerpomp_2_volume"}]
 
-VOLUME_PM = 50
+VOLUME_PM = 87
 
 utils.setup_logging(CONTEXT)
 device_repo = dr.device_repo()
