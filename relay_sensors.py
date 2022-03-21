@@ -37,7 +37,11 @@ try:
                 value = (sum(measurements[500:990]) - sum(measurements[10:500])) / 490
             else:                
                 while len(measurements) < 100:
-                    measurements.append(ads.read( channel = relay_sensor['channel'] - 8, gain = 16 ))
+                    try:
+                        measurements.append(ads.read( channel = relay_sensor['channel'] - 8, gain = 16 ))
+                    except OSError:
+                        logging.warning("[{CONTEXT}] error getting ads reading for {device_name}")
+                    
                     time.sleep(0.0001)
                     
                 measurements.sort()
