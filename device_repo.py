@@ -8,7 +8,6 @@ DB_NAME = "/home/pi/zeeaquarium"
 DB_DEVICES = "devices"
 DB_DEVICE_RELAY = "device_relay"
 DB_DEVICE_VALUES = "device_values"
-DB_DEVICE_VOLTAGE_THRESHOLD = "device_voltage_threshold"
 DB_RELAY_DEFAULT = "relay_default"
 DB_RELAY_PIN = "relay_pin"
 DB_RELAY_SENSORS = "relay_sensor_channel"
@@ -22,26 +21,6 @@ class device_repo:
             self.cursor = self.conn.cursor()
         else:
             logging.warning(f"[{CONTEXT}] db connection cannot be made")
-    
-    def get_device_voltage_threshold(self, device):
-        if not self.cursor:
-            logging.warning(f"[{CONTEXT}] cursor not set")
-            return
-        if not device:
-            logging.warning(f"[{CONTEXT}] illegal device")
-            return
-        
-        try:
-            self.cursor.execute(f"select threshold from {DB_DEVICE_VOLTAGE_THRESHOLD} where id = {device};")
-            device_voltage_threshold = self.cursor.fetchone()
-        except:
-            logging.warning(f"[{CONTEXT}] db query failed")
-            device_voltage_threshold = None
-        
-        if device_voltage_threshold and len(device_voltage_threshold) == 1:
-            return device_voltage_threshold[0]
-        else:
-            logging.warning(f"[{CONTEXT}] device voltage threshold cannot be found in db")  
     
     def get_device_name(self, device):
         if not self.cursor:

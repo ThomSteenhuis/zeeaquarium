@@ -8,12 +8,12 @@ import sensor_repo as sr
 import utils
 
 CONTEXT = "relay_sensors"
+THRESHOLD = 80;
 
 utils.setup_logging(CONTEXT)
 device_repo = dr.device_repo()
 sensor_repo = sr.sensor_repo()
 ads = ADS1115()
-mcp = MCP3008()
 
 try:
     while True:
@@ -21,35 +21,22 @@ try:
         for relay_sensor in relay_sensors:
             device = utils.retry_if_none(lambda : device_repo.get_device(relay_sensor['relay']))
             device_name = utils.retry_if_none(lambda : device_repo.get_device_name(device))
-            device_voltage_threshold = utils.retry_if_none(lambda: device_repo.get_device_voltage_threshold(device))
             
-            if not device_voltage_threshold:
-                logging.warning(f"[{CONTEXT}] {device_name} voltage threshold could not be retrieved from repo")
-                device_voltage_threshold = 0.5
-            
-            measurements = []
-            if relay_sensor['source'] == 'mcp':
-                while len(measurements) < 1000:
-                    measurements.append(mcp.read( channel = relay_sensor['channel'] ))
-                    time.sleep(0.0001)
-                    
-                measurements.sort()
-                value = (sum(measurements[500:990]) - sum(measurements[10:500])) / 490
-            else:                
-                while len(measurements) < 100:
-                    try:
-                        measurements.append(ads.read( channel = relay_sensor['channel'] - 8, gain = 16 ))
-                    except OSError:
-                        logging.warning("[{CONTEXT}] error getting ads reading for {device_name}")
-                    
-                    time.sleep(0.0001)
-                    
-                measurements.sort()
-                value = (sum(measurements[50:99]) - sum(measurements[1:50])) / 49
-            
+            measurements = []              
+            while len(measurements) < 50:
+                try:
+                    measurements.append(ads.read( channel = relay_sensor['channel'], gain = 16 ))
+                except OSError:
+                    logging.warning("[{CONTEXT}] error getting ads reading for {device_name}")
+                
+                time.sleep(0.0001)
+                
+            measurements.sort()
+            value = (sum(measurements[25:45]) - sum(measurements[5:25])) / 20
+            print(f"{device_name}: {value}")
             utils.retry_if_none(lambda : sensor_repo.set_raw_value(f"{device_name}_aan", str(value)))
             
-            if value >= device_voltage_threshold:
+            if value >= THRESHOLD:
                 utils.retry_if_none(lambda : sensor_repo.set_value(f"{device_name}_aan", "1"))
             else:
                 utils.retry_if_none(lambda : sensor_repo.set_value(f"{device_name}_aan", "0"))
@@ -61,6 +48,5 @@ except KeyboardInterrupt:
 except:
     logging.exception(f"[{CONTEXT}] general error")
 finally:
-    mcp.close()
     device_repo.close_connection()
     sensor_repo.close_connection()    
