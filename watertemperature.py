@@ -6,6 +6,7 @@ import sensor_repo as sr
 import utils
         
 CONTEXT = "watertemperature"
+WATER = "water"
 
 os.system("modprobe w1_gpio")
 os.system("modprobe w1_therm")
@@ -15,22 +16,29 @@ repo = sr.sensor_repo()
 
 try:
     while True:
+        temp_sensors = repo.get_temp_sensors()
+        temp_ids = [key for (key, value) in temp_sensors.items() if value == WATER]
+        
         temps = []
-        temp1 = utils.read_temp(0, "[" + CONTEXT + "]")
-        temp2 = utils.read_temp(2, "[" + CONTEXT + "]")
-        
-        if temp1 is None or temp1 < 15 or temp1 > 35:
-            logging.warning(f"[{CONTEXT}] invalid measurement of water temperature sensor 1")
-        else:
-            temps.append(temp1)
-            
-        if temp2 is None or temp2 < 15 or temp2 > 35:
-            logging.warning(f"[{CONTEXT}] invalid measurement of water temperature sensor 2")
-        else:
-            temps.append(temp2)
-        
+        for temp_id in temp_ids:
+            raw_temp = utils.read_temp(temp_id, "[" + CONTEXT + "]")
+                
+            if raw_temp is None or raw_temp < 15 or raw_temp > 35:
+                logging.warning(f"[{CONTEXT}] invalid measurement of temperature sensor {temp_id}")
+            else:
+                temps.append(raw_temp)
+                
         if len(temps) > 0:
             temp = sum(temps) / len(temps)
+            if len(temps) >= 3:
+                valid_temps = []
+                for t in temps:
+                    if abs(temp - t) <= 0.5:
+                        valid_temps.append(t)
+                        
+                if len(valid_temps) > 0:
+                    temp = sum(valid_temps) / len(valid_temps)
+            
             utils.retry_if_none(lambda : repo.set_value(CONTEXT, temp))
         else:
             logging.warning(f"[{CONTEXT}] no valid measurement")

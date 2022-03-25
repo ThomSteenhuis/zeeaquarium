@@ -37,7 +37,7 @@ class setting_repo:
             return names
         else:
             logging.warning(f"[{CONTEXT}] setting names cannot be found in db")
-            
+        
     def get_value(self, name):
         if not self.cursor:
             logging.warning(f"[{CONTEXT}] cursor not set")

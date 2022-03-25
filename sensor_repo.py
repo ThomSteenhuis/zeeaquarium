@@ -9,6 +9,7 @@ DB_NAME = "/home/pi/zeeaquarium"
 DB_SENSORS = "sensors"
 DB_SENSOR_VALUES = "sensor_values"
 DB_SENSOR_RAW_VALUES = "sensor_raw_values"
+DB_TEMP_SENSORS = "temp_sensors"
 CONTEXT = "sensor_repo"
 
 MAX_SECONDS_OUTDATED = 60
@@ -41,7 +42,29 @@ class sensor_repo:
                 
             return names
         else:
-            logging.warning(f"[{CONTEXT}] sensor names cannot be found in db")  
+            logging.warning(f"[{CONTEXT}] sensor names cannot be found in db")
+            
+    def get_temp_sensors(self):
+        if not self.cursor:
+            logging.warning(f"[{CONTEXT}] cursor not set")
+            return
+        
+        try:
+            self.cursor.execute(f"select id, type from {DB_TEMP_SENSORS};")
+            temp_sensors = self.cursor.fetchall()
+        except:
+            logging.warning(f"[{CONTEXT}] db query failed")
+            temp_sensors = None
+        
+        if temp_sensors:
+            sensors = {}
+            for sensor in temp_sensors:
+                if len(sensor) == 2:
+                    sensors[sensor[0]] = sensor[1]
+                
+            return sensors
+        else:
+            logging.warning(f"[{CONTEXT}] temp sensors cannot be found in db")
     
     def get_value(self, name, max_seconds_outdated = MAX_SECONDS_OUTDATED):
         if not self.cursor:
