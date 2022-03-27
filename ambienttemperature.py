@@ -16,7 +16,7 @@ repo = sr.sensor_repo()
 
 try:
     while True:
-        temp_sensors = repo.get_temp_sensors()
+        temp_sensors = utils.retry_if_none(lambda: repo.get_temp_sensors())
         if temp_sensors:
             temp_ids = [key for (key, value) in temp_sensors.items() if value == AMBIENT]
             
