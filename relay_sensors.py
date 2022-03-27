@@ -22,24 +22,28 @@ try:
             device = utils.retry_if_none(lambda : device_repo.get_device(relay_sensor['relay']))
             device_name = utils.retry_if_none(lambda : device_repo.get_device_name(device))
             
-            measurements = []              
-            while len(measurements) < 50:
+            measurements = []
+            tries = 0
+            while len(measurements) < 50 and tries < 100:
                 try:
+                    tries = tries + 1
                     measurements.append(ads.read( channel = relay_sensor['channel'], gain = 16 ))
                 except OSError:
-                    logging.warning("[{CONTEXT}] error getting ads reading for {device_name}")
+                    logging.warning(f"[{CONTEXT}] error getting ads reading for {device_name}")
                 
-                time.sleep(0.0001)
-                
-            measurements.sort()
-            value = (sum(measurements[25:45]) - sum(measurements[5:25])) / 20
-            print(f"{device_name}: {value}")
-            utils.retry_if_none(lambda : sensor_repo.set_raw_value(f"{device_name}_aan", str(value)))
+                time.sleep(0.01)
             
-            if value >= THRESHOLD:
-                utils.retry_if_none(lambda : sensor_repo.set_value(f"{device_name}_aan", "1"))
+            if len(measurements) == 50:
+                measurements.sort()
+                value = (sum(measurements[25:45]) - sum(measurements[5:25])) / 20
+                utils.retry_if_none(lambda : sensor_repo.set_raw_value(f"{device_name}_aan", str(value)))
+                
+                if value >= THRESHOLD:
+                    utils.retry_if_none(lambda : sensor_repo.set_value(f"{device_name}_aan", "1"))
+                else:
+                    utils.retry_if_none(lambda : sensor_repo.set_value(f"{device_name}_aan", "0"))
             else:
-                utils.retry_if_none(lambda : sensor_repo.set_value(f"{device_name}_aan", "0"))
+                logging.warning(f"[{CONTEXT}] not enough measurements for {device_name}")
         
         time.sleep(1)
         
