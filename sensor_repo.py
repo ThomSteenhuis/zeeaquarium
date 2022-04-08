@@ -143,7 +143,7 @@ class sensor_repo:
         if not name:            
             logging.warning(f"[{CONTEXT}] illegal name")
             return
-        if not value:            
+        if value is None:            
             logging.warning(f"[{CONTEXT}] illegal value")
             return
         

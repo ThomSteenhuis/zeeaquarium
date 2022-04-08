@@ -22,7 +22,6 @@ try:
     
         measurements.sort()
         leakage = 100 - round(sum(measurements[10:40]) / (30 * 10.23), 2)
-        print(leakage)
         
         if not leakage is None:
             utils.retry_if_none(lambda : repo.set_value(CONTEXT, leakage))
