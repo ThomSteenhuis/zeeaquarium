@@ -22,6 +22,9 @@ try:
             device = utils.retry_if_none(lambda : device_repo.get_device(relay_sensor['relay']))
             device_name = utils.retry_if_none(lambda : device_repo.get_device_name(device))
             
+            if (device_name is None):
+                continue
+            
             measurements = []
             tries = 0
             while len(measurements) < 100 and tries < 200:
