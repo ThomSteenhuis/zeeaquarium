@@ -8,7 +8,7 @@ import sensor_repo as sr
 import utils
 
 CONTEXT = "relay_sensors"
-THRESHOLD = 80;
+THRESHOLD = 20;
 
 utils.setup_logging(CONTEXT)
 device_repo = dr.device_repo()
@@ -24,7 +24,7 @@ try:
             
             measurements = []
             tries = 0
-            while len(measurements) < 50 and tries < 100:
+            while len(measurements) < 100 and tries < 200:
                 try:
                     tries = tries + 1
                     measurements.append(ads.read( channel = relay_sensor['channel'], gain = 16 ))
@@ -33,9 +33,9 @@ try:
                 
                 time.sleep(0.01)
             
-            if len(measurements) == 50:
+            if len(measurements) == 100:
                 measurements.sort()
-                value = (sum(measurements[25:45]) - sum(measurements[5:25])) / 20
+                value = (sum(measurements[50:90]) - sum(measurements[10:50])) / 40
                 utils.retry_if_none(lambda : sensor_repo.set_raw_value(f"{device_name}_aan", str(value)))
                 
                 if value >= THRESHOLD:
