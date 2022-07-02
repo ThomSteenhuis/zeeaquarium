@@ -27,16 +27,21 @@ try:
                 if raw_temp is None or raw_temp < 15 or raw_temp > 35:
                     logging.warning(f"[{CONTEXT}] invalid measurement of temperature sensor {temp_id}")
                 else:
-                    temps.append(raw_temp)
+                    temps.append((temp_id, raw_temp))
                     
             if len(temps) > 0:
-                temp = sum(temps) / len(temps)
+                temps_only = [t[1] for t in temps]
+                temp = sum(temps_only) / len(temps_only)
                 if len(temps) >= 3:
-                    valid_temps = []
-                    for t in temps:
-                        if abs(temp - t) <= 0.5:
-                            valid_temps.append(t)
-                            
+                    diffs = [(t[0], t[1], abs(temp - t[1])) for t in temps]
+                    diffs = sorted(diffs, key=lambda x: x[2], reverse=True)
+                    
+                    if diffs[0][2] > 0.5:
+                        valid_temps = [d[1] for d in diffs[1:]]
+                        logging.warning(f"[{CONTEXT}] removed outlier {diffs[0][0]} = {diffs[0][1]}")
+                    else:
+                        valid_temps = [d[1] for d in diffs]
+                    
                     if len(valid_temps) > 0:
                         temp = sum(valid_temps) / len(valid_temps)
                 
