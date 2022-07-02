@@ -10,10 +10,11 @@ import utils
 CONTEXT = "watervolume_control"
 ATO = "ato"
 FLOATSENSOR = "vlotter"
-WATER_TOPOFF_AT = "water_bijvul_tijdstip"
+WATER_TOPOFF_AT1 = "water_bijvul_tijdstip1"
+WATER_TOPOFF_AT2 = "water_bijvul_tijdstip2"
 WATERVOLUME_TARGET = "watervolume_streefwaarde"
 WATERVOLUME_AVG = "watervolume_avg"
-MAX_TOPOFF_VOLUME = 2
+MAX_TOPOFF_VOLUME = 1.5
 VOLUME_PM = 0.5
 
 utils.setup_logging(CONTEXT)
@@ -30,15 +31,20 @@ try:
         if utils.retry_if_none(lambda: sensor_repo.get_value(FLOATSENSOR, 0)) == "1":
             logging.warning(f"[{CONTEXT}] water level too high")
         
-        water_topoff_at = utils.parse_string_to_time(CONTEXT, utils.retry_if_none(lambda: setting_repo.get_value(WATER_TOPOFF_AT)))
+        water_topoff_at1 = utils.parse_string_to_time(CONTEXT, utils.retry_if_none(lambda: setting_repo.get_value(WATER_TOPOFF_AT1)))
+        water_topoff_at2 = utils.parse_string_to_time(CONTEXT, utils.retry_if_none(lambda: setting_repo.get_value(WATER_TOPOFF_AT2)))
         
-        if water_topoff_at is None:
-            logging.warning(f"[{CONTEXT}] water topoff time could not be retrieved")
+        if water_topoff_at1 is None:
+            logging.warning(f"[{CONTEXT}] water topoff time 1 could not be retrieved")
+            continue
+        
+        if water_topoff_at2 is None:
+            logging.warning(f"[{CONTEXT}] water topoff time 2 could not be retrieved")
             continue
         
         now = dt.datetime.now().time()
         
-        if now >= water_topoff_at and old < water_topoff_at:
+        if now >= water_topoff_at1 and old < water_topoff_at1 or now >= water_topoff_at2 and old < water_topoff_at2:
             try: 
                 watervolume_target = float(utils.retry_if_none(lambda: setting_repo.get_value(WATERVOLUME_TARGET)))
                 watervolume_current = float(utils.retry_if_none(lambda: sensor_repo.get_value(WATERVOLUME_AVG, 3600)))
@@ -54,7 +60,7 @@ try:
                 logging.warning(f"[{CONTEXT}] current watervolume could be retrieved")
                 continue
             
-            watervolume_topoff = min(2, watervolume_target - watervolume_current)
+            watervolume_topoff = min(MAX_TOPOFF_VOLUME, watervolume_target - watervolume_current)
             
             if watervolume_topoff <= 0:
                 logging.info(f"[{CONTEXT}] no need to top off")
