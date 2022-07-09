@@ -48,12 +48,12 @@ try:
         average_temp = sum(temps) / len(temps)
         if average_temp > (temp_heating_threshold + MARGIN):
             utils.retry_if_none(lambda : device_repo.set_value(HEATING, False)) #Off
-        else if average_temp < (temp_heating_threshold - MARGIN):
+        elif average_temp < (temp_heating_threshold - MARGIN):
             utils.retry_if_none(lambda : device_repo.set_value(HEATING, True)) #On
             
         if average_temp > (temp_cooling_threshold + MARGIN):
             utils.retry_if_none(lambda : device_repo.set_value(COOLING, True)) #On
-        else if average_temp < (temp_cooling_threshold - MARGIN):
+        elif average_temp < (temp_cooling_threshold - MARGIN):
             utils.retry_if_none(lambda : device_repo.set_value(COOLING, False)) #Off
 except KeyboardInterrupt:
     pass
