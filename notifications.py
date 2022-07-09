@@ -88,7 +88,11 @@ def get_variable(variable):
             return float(value) + float(addition)
         
     if variable.get('type') == 'setting':
-        value = utils.retry_if_none(lambda: setting_repo.get_value(variable.get('value')))        
+        value = utils.retry_if_none(lambda: setting_repo.get_value(variable.get('value')))
+        
+        if value is None:
+            return None
+        
         addition = variable.get('addition')        
         
         if addition is None:

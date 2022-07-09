@@ -55,7 +55,7 @@ try:
         if not volume is None:
             utils.retry_if_none(lambda : repo.set_value(CONTEXT, volume))
         else:
-            logging.warning(f"[{CONTEXT}] invalid measurement")
+            logging.warning(f"[{CONTEXT}] average could not be calculated")
         
 except KeyboardInterrupt:
     pass

@@ -48,7 +48,7 @@ try:
             try: 
                 watervolume_target = float(utils.retry_if_none(lambda: setting_repo.get_value(WATERVOLUME_TARGET)))
                 watervolume_current = float(utils.retry_if_none(lambda: sensor_repo.get_value(WATERVOLUME_AVG, 3600)))
-            except ValueError:
+            except (TypeError, ValueError) as e:
                 logging.warning(f"[{CONTEXT}] cannot convert value to floating point number")
                 continue
             

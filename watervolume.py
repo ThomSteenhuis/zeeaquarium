@@ -58,7 +58,7 @@ try:
             measurements_avg.append(volume)
             utils.retry_if_none(lambda : repo.set_value(CONTEXT, volume))
         else:
-            logging.warning(f"[{CONTEXT}] invalid measurement")
+            logging.warning(f"[{CONTEXT}] average could not be calculated")
         
         if len(measurements_avg) >= 100:
             utils.retry_if_none(lambda : repo.set_value(WATERVOLUME_AVG, round(sum(measurements_avg) / len(measurements_avg), 2)))
