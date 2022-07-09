@@ -14,6 +14,7 @@ HEATING_THRESHOLD = "verwarming_drempel"
 COOLING_THRESHOLD = "ventilator_drempel"
 TEMP = "watertemperature"
 MAX_QUERIES = 100
+MARGIN = 0.2
 
 utils.setup_logging(CONTEXT)
 
@@ -23,8 +24,11 @@ device_repo = dr.device_repo()
 
 try:
     while True:
-        temp_heating_threshold = float(utils.retry_if_none(lambda : setting_repo.get_value(HEATING_THRESHOLD)))
-        temp_cooling_threshold = float(utils.retry_if_none(lambda : setting_repo.get_value(COOLING_THRESHOLD)))
+        try:
+            temp_heating_threshold = float(utils.retry_if_none(lambda : setting_repo.get_value(HEATING_THRESHOLD)))
+            temp_cooling_threshold = float(utils.retry_if_none(lambda : setting_repo.get_value(COOLING_THRESHOLD)))
+        except TypeError:
+            continue
         
         temps = []
         queries = 0
@@ -41,18 +45,15 @@ try:
                     
             time.sleep(1)
         
-        if queries >= MAX_QUERIES:
-            utils.retry_if_none(lambda : device_repo.set_value(HEATING, True)) #default    
-            utils.retry_if_none(lambda : device_repo.set_value(COOLING, False)) #default
-            
-        if (sum(temps) / len(temps)) > temp_heating_threshold:
+        average_temp = sum(temps) / len(temps)
+        if average_temp > (temp_heating_threshold + MARGIN):
             utils.retry_if_none(lambda : device_repo.set_value(HEATING, False)) #Off
-        else:
+        else if average_temp < (temp_heating_threshold - MARGIN):
             utils.retry_if_none(lambda : device_repo.set_value(HEATING, True)) #On
             
-        if (sum(temps) / len(temps)) > temp_cooling_threshold:
+        if average_temp > (temp_cooling_threshold + MARGIN):
             utils.retry_if_none(lambda : device_repo.set_value(COOLING, True)) #On
-        else:
+        else if average_temp < (temp_cooling_threshold - MARGIN):
             utils.retry_if_none(lambda : device_repo.set_value(COOLING, False)) #Off
 except KeyboardInterrupt:
     pass
