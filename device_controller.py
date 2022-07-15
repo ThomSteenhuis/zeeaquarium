@@ -36,13 +36,13 @@ try:
                 logging.warning(f"[{CONTEXT}] illegal value")
             else:
                 if value and p["default"]:
-                    GPIO.output(p["pin"], GPIO.HIGH) # On:
+                    GPIO.output(p["pin"], GPIO.LOW) # On:
                 elif value and not p["default"]:
-                    GPIO.output(p["pin"], GPIO.LOW) # On
+                    GPIO.output(p["pin"], GPIO.HIGH) # On
                 elif not value and p["default"]:
-                    GPIO.output(p["pin"], GPIO.LOW) # Off
-                else:
                     GPIO.output(p["pin"], GPIO.HIGH) # Off
+                else:
+                    GPIO.output(p["pin"], GPIO.LOW) # Off
         
         time.sleep(0.2)          
 except KeyboardInterrupt:
