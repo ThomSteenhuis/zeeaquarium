@@ -8,7 +8,7 @@ import utils
 
 CONTEXT = "dosing"
 DOSING_AT = "doseer_tijdstip"
-DOSING_PUMPS = [{"name": "doseerpomp_1", "volume": "doseerpomp_1_volume"}, {"name": "doseerpomp_2", "volume": "doseerpomp_2_volume"}]
+DOSING_PUMPS = [{"name": "doseerpomp_1", "volume": "doseerpomp_1_volume"}, {"name": "doseerpomp_2", "volume": "doseerpomp_2_volume"}, {"name": "doseerpomp_3", "volume": "doseerpomp_3_volume"}, {"name": "doseerpomp_4", "volume": "doseerpomp_4_volume"}]
 
 VOLUME_PM = 87
 
