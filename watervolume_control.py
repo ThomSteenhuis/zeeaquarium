@@ -14,8 +14,8 @@ WATER_TOPOFF_AT1 = "water_bijvul_tijdstip1"
 WATER_TOPOFF_AT2 = "water_bijvul_tijdstip2"
 WATERVOLUME_TARGET = "watervolume_streefwaarde"
 WATERVOLUME_AVG = "watervolume_avg"
-MAX_TOPOFF_VOLUME = 1.5
-VOLUME_PM = 0.5
+MAX_TOPOFF_VOLUME = "water_bijvul_max"
+VOLUME_PM = "water_bijvul_vpm"
 
 utils.setup_logging(CONTEXT)
 device_repo = dr.device_repo()
@@ -34,6 +34,14 @@ try:
         water_topoff_at1 = utils.parse_string_to_time(CONTEXT, utils.retry_if_none(lambda: setting_repo.get_value(WATER_TOPOFF_AT1)))
         water_topoff_at2 = utils.parse_string_to_time(CONTEXT, utils.retry_if_none(lambda: setting_repo.get_value(WATER_TOPOFF_AT2)))
         
+        try:
+            max_topoff_volume = float(utils.retry_if_none(lambda: setting_repo.get_value(MAX_TOPOFF_VOLUME)))
+            volume_pm = float(utils.retry_if_none(lambda: setting_repo.get_value(VOLUME_PM)))
+        except (TypeError, ValueError) as e:
+            logging.warning(f"[{CONTEXT}] cannot convert setting to floating point number")
+            continue
+
+        
         if water_topoff_at1 is None:
             logging.warning(f"[{CONTEXT}] water topoff time 1 could not be retrieved")
             continue
@@ -49,7 +57,7 @@ try:
                 watervolume_target = float(utils.retry_if_none(lambda: setting_repo.get_value(WATERVOLUME_TARGET)))
                 watervolume_current = float(utils.retry_if_none(lambda: sensor_repo.get_value(WATERVOLUME_AVG, 3600)))
             except (TypeError, ValueError) as e:
-                logging.warning(f"[{CONTEXT}] cannot convert value to floating point number")
+                logging.warning(f"[{CONTEXT}] cannot convert volume to floating point number")
                 continue
             
             if not watervolume_target:
@@ -60,12 +68,12 @@ try:
                 logging.warning(f"[{CONTEXT}] current watervolume could be retrieved")
                 continue
             
-            watervolume_topoff = min(MAX_TOPOFF_VOLUME, watervolume_target - watervolume_current)
+            watervolume_topoff = min(max_topoff_volume, watervolume_target - watervolume_current)
             
             if watervolume_topoff <= 0:
                 logging.info(f"[{CONTEXT}] no need to top off")
             else:            
-                time_topoff = 60 * watervolume_topoff / VOLUME_PM
+                time_topoff = 60 * watervolume_topoff / volume_pm
                 
                 utils.retry_if_none(lambda: device_repo.set_value(ATO, True))            
                 time.sleep(time_topoff)
