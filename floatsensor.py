@@ -21,7 +21,7 @@ try:
         if GPIO.input(PIN) == 0:
             high_level_cnt += 1
         else:
-            time.sleep(5)   
+            time.sleep(5)
             utils.retry_if_none(lambda : repo.set_value(CONTEXT, "0"))                
             high_level_cnt = 0
         

@@ -8,9 +8,12 @@ import utils
 
 CONTEXT = "dosing"
 DOSING_AT = "doseer_tijdstip"
-DOSING_PUMPS = [{"name": "doseerpomp_1", "volume": "doseerpomp_1_volume"}, {"name": "doseerpomp_2", "volume": "doseerpomp_2_volume"}, {"name": "doseerpomp_3", "volume": "doseerpomp_3_volume"}, {"name": "doseerpomp_4", "volume": "doseerpomp_4_volume"}]
-
-VOLUME_PM = 87
+DOSING_PUMPS = [
+    {"name": "doseerpomp_1"},
+    {"name": "doseerpomp_2"},
+    {"name": "doseerpomp_3"},
+    {"name": "doseerpomp_4"},
+    {"name": "doseerpomp_5"}]
 
 utils.setup_logging(CONTEXT)
 device_repo = dr.device_repo()
@@ -35,7 +38,7 @@ try:
             for pump in DOSING_PUMPS:
                 pump_name = pump["name"]
                 try: 
-                    dosing_volume = float(utils.retry_if_none(lambda: setting_repo.get_value(pump["volume"])))
+                    dosing_volume = float(utils.retry_if_none(lambda: setting_repo.get_value(f"{pump_name}_volume")))
                 except ValueError:
                     logging.warning(f"[{CONTEXT}] cannot convert volume of {pump_name} to floating point number")
                     continue
@@ -46,8 +49,18 @@ try:
                         
                 if dosing_volume <= 0:
                     logging.info(f"[{CONTEXT}] {pump_name}: no need to dose")
-                else:            
-                    time_dose = 60 * dosing_volume / VOLUME_PM
+                else:
+                    try: 
+                        dosing_vpm = float(utils.retry_if_none(lambda: setting_repo.get_value(f"{pump_name}_vpm")))
+                    except ValueError:
+                        logging.warning(f"[{CONTEXT}] cannot convert vpm of {pump_name} to floating point number")
+                        continue
+                
+                    if not dosing_vpm:
+                        logging.warning(f"[{CONTEXT}] vpm of {pump_name} could not be retrieved")
+                        continue
+                
+                    time_dose = 60 * dosing_volume / dosing_vpm
                     
                     utils.retry_if_none(lambda: device_repo.set_value(pump_name, True))            
                     time.sleep(time_dose)
