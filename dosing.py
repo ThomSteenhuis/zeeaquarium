@@ -60,7 +60,7 @@ try:
                         logging.warning(f"[{CONTEXT}] vpm of {pump_name} could not be retrieved")
                         continue
                 
-                    time_dose = 60 * dosing_volume / dosing_vpm
+                    time_dose = 60 * dosing_volume / (1000 * dosing_vpm)
                     
                     utils.retry_if_none(lambda: device_repo.set_value(pump_name, True))            
                     time.sleep(time_dose)
