@@ -38,7 +38,7 @@ try:
             for pump in DOSING_PUMPS:
                 pump_name = pump["name"]
                 try: 
-                    dosing_volume = float(utils.retry_if_none(lambda: setting_repo.get_value(f"{pump_name}_volume")))
+                    dosing_volume = float(utils.retry_if_none(lambda: setting_repo.get_value(f"{pump_name}_volume"), 10))
                 except ValueError:
                     logging.warning(f"[{CONTEXT}] cannot convert volume of {pump_name} to floating point number")
                     continue
@@ -51,7 +51,7 @@ try:
                     logging.info(f"[{CONTEXT}] {pump_name}: no need to dose")
                 else:
                     try: 
-                        dosing_vpm = float(utils.retry_if_none(lambda: setting_repo.get_value(f"{pump_name}_vpm")))
+                        dosing_vpm = float(utils.retry_if_none(lambda: setting_repo.get_value(f"{pump_name}_vpm"), 10))
                     except ValueError:
                         logging.warning(f"[{CONTEXT}] cannot convert vpm of {pump_name} to floating point number")
                         continue
@@ -62,9 +62,9 @@ try:
                 
                     time_dose = 60 * dosing_volume / (1000 * dosing_vpm)
                     
-                    utils.retry_if_none(lambda: device_repo.set_value(pump_name, True))            
+                    utils.retry_if_none(lambda: device_repo.set_value(pump_name, True), 10)            
                     time.sleep(time_dose)
-                    utils.retry_if_none(lambda: device_repo.set_value(pump_name, False))
+                    utils.retry_if_none(lambda: device_repo.set_value(pump_name, False), 10)
                     
                     logging.info(f"[{CONTEXT}] {pump_name}: dosed {round(dosing_volume, 1)}mL")
         
