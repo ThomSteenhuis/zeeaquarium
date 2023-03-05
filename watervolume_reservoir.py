@@ -7,8 +7,8 @@ import utils
 
 CONTEXT = "watervolume_reservoir"
 
-PIN_TRIGGER = 38
-PIN_ECHO = 40
+PIN_TRIGGER = 36
+PIN_ECHO = 22
 
 SPEED_OF_SOUND = 3430 # dm/s
 SURFACE_AREA = 2.4 * 2.9 # dm
@@ -33,7 +33,7 @@ try:
             GPIO.output(PIN_TRIGGER, GPIO.LOW)
             
             ref = time.time()
-            pulse_start = time.time()            
+            pulse_start = time.time()
             while GPIO.input(PIN_ECHO)==0 and utils.time_diff(ref, pulse_start) < 0.01:
                 pulse_start = time.time()
                 

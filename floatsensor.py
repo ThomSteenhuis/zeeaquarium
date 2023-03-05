@@ -33,4 +33,6 @@ except KeyboardInterrupt:
     pass
 except:
     logging.exception(f"[{CONTEXT}] general error")
+finally:
+    repo.close_connection()
     
