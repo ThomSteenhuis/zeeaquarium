@@ -43,29 +43,29 @@ def login_client_credentials():
     raise requests.exceptions.ConnectionError()
 
 def get_token_client_credentials(context):
-    token = None
-    while token is None:
-        try:
-            token = login_client_credentials()
-        except requests.exceptions.RequestException:
-            logging.warning(f"[{context}] connection error while logging in")
-        time.sleep(1)
+    try:
+        return login_client_credentials()
+    except requests.exceptions.RequestException:
+        logging.warning(f"[{context}] connection error while logging in")
     
-    return token
-
-def post_measurement(token, userId, reefId, measurementId, timestamp, value):
-    response = requests.post(
-        "https://reef-tank-api.azurewebsites.net/measurement/value",
-        json={
-            "userId": userId,
-            "reefId": reefId,
-            "measurementId": measurementId,
-            "timestamp": timestamp,
-            "value": value
-        }, headers = {'Authorization': 'Bearer ' + token})
-    if response.status_code == 200:
-        return "saved"
     return None
+
+def post_measurement(context, token, userId, reefId, measurementId, timestamp, value):
+    try:
+        response = requests.post(
+            "https://reef-tank-api.azurewebsites.net/measurement/value",
+            json={
+                "userId": userId,
+                "reefId": reefId,
+                "measurementId": measurementId,
+                "timestamp": timestamp,
+                "value": value
+            }, headers = {'Authorization': 'Bearer ' + token}, timeout = 3)
+        if response.status_code == 200:
+            return "saved"
+        return None
+    except requests.exceptions.RequestException:
+        logging.warning(f"[{context}] connection error while posting measurement")
 
 def login():
     response = requests.post(

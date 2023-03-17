@@ -44,7 +44,7 @@ try:
                         token = utils.retry_if_none(lambda : utils.get_token_client_credentials(CONTEXT))
                     
                     now = datetime.utcnow().isoformat()
-                    utils.retry_if_none(lambda : utils.post_measurement(token["accessToken"], USER_ID, REEF_ID, measurement_ids[temp_item[0]], now, temp))
+                    utils.post_measurement(CONTEXT, token["accessToken"], USER_ID, REEF_ID, measurement_ids[temp_item[0]], now, temp)
                 else:
                     logging.warning(f"[{CONTEXT}] no valid measurement")
         else:

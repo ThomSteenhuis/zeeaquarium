@@ -65,7 +65,7 @@ try:
                 token = utils.retry_if_none(lambda : utils.get_token_client_credentials(CONTEXT))
             
             now = datetime.utcnow().isoformat()
-            utils.retry_if_none(lambda : utils.post_measurement(token["accessToken"], USER_ID, REEF_ID, measurement_ids[CONTEXT], now, volume))
+            utils.post_measurement(CONTEXT, token["accessToken"], USER_ID, REEF_ID, measurement_ids[CONTEXT], now, volume)
         else:
             logging.warning(f"[{CONTEXT}] average could not be calculated")
         
