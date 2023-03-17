@@ -1,19 +1,25 @@
 from MCP3008 import MCP3008
 import logging
 import time
+from datetime import datetime, timedelta, timezone
+from dateutil import parser
 
 import sensor_repo as sr
 import utils
 
 CONTEXT = "leakage"
 LEAKAGE_CHANNEL = 6
+USER_ID = utils.read_secret("user_id")
+REEF_ID = utils.read_secret("reef_id")
 
 utils.setup_logging(CONTEXT)
 repo = sr.sensor_repo()
 adc = MCP3008()
+token = None
 
 try:    
     while True:
+        measurement_ids = utils.retry_if_none(lambda: repo.get_sensor_measurement_ids())
         measurements = []
         while len(measurements) < 50:
             value = adc.read( channel = LEAKAGE_CHANNEL )
@@ -25,6 +31,12 @@ try:
         
         if not leakage is None:
             utils.retry_if_none(lambda : repo.set_value(CONTEXT, leakage))
+            
+            if token == None or parser.parse(token['expiresAt']) < datetime.now(timezone.utc) + timedelta(hours = 1):
+                token = utils.retry_if_none(lambda : utils.get_token_client_credentials(CONTEXT))
+            
+            now = datetime.utcnow().isoformat()
+            utils.retry_if_none(lambda : utils.post_measurement(token["accessToken"], USER_ID, REEF_ID, measurement_ids[CONTEXT], now, leakage))
         else:
             logging.warning(f"[{CONTEXT}] invalid measurement")
 except KeyboardInterrupt:

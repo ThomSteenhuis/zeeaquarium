@@ -30,6 +30,43 @@ def read_secret(filename):
     except IOError:
         logging.warning("[secrets] file not accessible")
 
+def login_client_credentials():
+    response = requests.post(
+        read_secret("login_client_credentials_url"),
+        json={
+            "grantType": "client_credentials",
+            "clientId": read_secret("login_client_id"),
+            "clientSecret": read_secret("login_client_secret")
+            }, timeout = 3)
+    if response.status_code == 200:
+        return response.json()
+    raise requests.exceptions.ConnectionError()
+
+def get_token_client_credentials(context):
+    token = None
+    while token is None:
+        try:
+            token = login_client_credentials()
+        except requests.exceptions.RequestException:
+            logging.warning(f"[{context}] connection error while logging in")
+        time.sleep(1)
+    
+    return token
+
+def post_measurement(token, userId, reefId, measurementId, timestamp, value):
+    response = requests.post(
+        "https://reef-tank-api.azurewebsites.net/measurement/value",
+        json={
+            "userId": userId,
+            "reefId": reefId,
+            "measurementId": measurementId,
+            "timestamp": timestamp,
+            "value": value
+        }, headers = {'Authorization': 'Bearer ' + token})
+    if response.status_code == 200:
+        return "saved"
+    return None
+
 def login():
     response = requests.post(
         read_secret("login_url"),
@@ -118,8 +155,9 @@ def read_temp_raw(file, context):
         
 def read_temp(index, context):
     try:
-        device_folder = glob.glob(BASE_DIR_TEMP + "/28*")[index]
-        device_file = device_folder + "/w1_slave"
+        device_folders = glob.glob(BASE_DIR_TEMP + "/28*")
+        device_folders.sort()
+        device_file = device_folders[index] + "/w1_slave"
         lines = read_temp_raw(device_file, context)
         if lines is None or not isinstance(lines, list) or len(lines) < 2 or lines[0].strip()[-3:] != "YES":
             logging.warning(f"{context} file is corrupted")

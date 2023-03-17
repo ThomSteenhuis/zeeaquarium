@@ -7,6 +7,7 @@ import utils
 
 DB_NAME = "/home/pi/zeeaquarium"
 DB_SENSORS = "sensors"
+DB_SENSOR_MEASUREMENT_IDS = "sensor_measurement_ids"
 DB_SENSOR_VALUES = "sensor_values"
 DB_SENSOR_RAW_VALUES = "sensor_raw_values"
 DB_TEMP_SENSORS = "temp_sensors"
@@ -43,6 +44,26 @@ class sensor_repo:
             return names
         else:
             logging.warning(f"[{CONTEXT}] sensor names cannot be found in db")
+            
+    def get_sensor_measurement_ids(self):
+        if not self.cursor:
+            logging.warning(f"[{CONTEXT}] cursor not set")
+            return
+        
+        try:
+            self.cursor.execute(f"select B.name, A.measurement_id from ({DB_SENSOR_MEASUREMENT_IDS} as A left join {DB_SENSORS} as B on A.id = B.id);")
+            sensor_measurement_ids = self.cursor.fetchall()
+        except:
+            logging.warning(f"[{CONTEXT}] db query failed")
+            sensor_measurement_ids = None
+        
+        if sensor_measurement_ids:
+            dictionary = {}
+            for (key, value) in sensor_measurement_ids:
+               dictionary.setdefault(key, value)
+            return dictionary
+        else:
+            logging.warning(f"[{CONTEXT}] sensor measurement ids cannot be found in db")
             
     def get_temp_sensors(self):
         if not self.cursor:

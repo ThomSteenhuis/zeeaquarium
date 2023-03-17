@@ -1,12 +1,16 @@
 import RPi.GPIO as GPIO
 import logging
 import time
+from datetime import datetime, timedelta, timezone
+from dateutil import parser
 
 import sensor_repo as sr
 import utils
 
 CONTEXT = "watervolume"
 WATERVOLUME_AVG = "watervolume_avg"
+USER_ID = utils.read_secret("user_id")
+REEF_ID = utils.read_secret("reef_id")
 
 PIN_TRIGGER = 13
 PIN_ECHO = 11
@@ -17,6 +21,7 @@ MAX_VOLUME = 196.62 # dm3
 
 utils.setup_logging(CONTEXT)
 repo = sr.sensor_repo()
+token = None
 
 GPIO.setmode(GPIO.BOARD)
 GPIO.setup(PIN_TRIGGER, GPIO.OUT)
@@ -28,6 +33,7 @@ time.sleep(2)
 try:
     measurements_avg = []
     while True:
+        measurement_ids = utils.retry_if_none(lambda: repo.get_sensor_measurement_ids())
         measurements = []
         while len(measurements) < 300:                
             GPIO.output(PIN_TRIGGER, GPIO.HIGH)            
@@ -57,6 +63,12 @@ try:
         if not volume is None:
             measurements_avg.append(volume)
             utils.retry_if_none(lambda : repo.set_value(CONTEXT, volume))
+            
+            if token == None or parser.parse(token['expiresAt']) < datetime.now(timezone.utc) + timedelta(hours = 1):
+                token = utils.retry_if_none(lambda : utils.get_token_client_credentials(CONTEXT))
+            
+            now = datetime.utcnow().isoformat()
+            utils.retry_if_none(lambda : utils.post_measurement(token["accessToken"], USER_ID, REEF_ID, measurement_ids[CONTEXT], now, volume))
         else:
             logging.warning(f"[{CONTEXT}] average could not be calculated")
         
