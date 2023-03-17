@@ -53,7 +53,7 @@ try:
             else:
                 logging.warning(f"[{CONTEXT}] invalid measurement")
                 
-            time.sleep(0.005)
+            time.sleep(0.01)
         
         measurements.sort()
         volume = round(sum(measurements[75:225]) / 150, 2)

@@ -24,7 +24,7 @@ try:
         while len(measurements) < 50:
             value = adc.read( channel = LEAKAGE_CHANNEL )
             measurements.append(value)
-            time.sleep(0.01)
+            time.sleep(0.1)
     
         measurements.sort()
         leakage = 100 - round(sum(measurements[10:40]) / (30 * 10.23), 2)
