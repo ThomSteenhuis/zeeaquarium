@@ -27,7 +27,7 @@ try:
             for temp_sensor in temp_sensors.items():
                 raw_temp = utils.read_temp(temp_sensor[0], "[" + CONTEXT + "]")
                 if raw_temp is None or raw_temp < 15 or raw_temp > 35:
-                    logging.warning(f"[{CONTEXT}] invalid measurement of temperature sensor {temp_id}")
+                    logging.warning(f"[{CONTEXT}] invalid measurement of temperature sensor {temp_sensor[0]}")
                 else:
                     temps.append((temp_sensor[1], raw_temp))
                     
