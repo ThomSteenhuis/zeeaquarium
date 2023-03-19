@@ -35,7 +35,7 @@ try:
     while True:
         measurement_ids = utils.retry_if_none(lambda: repo.get_sensor_measurement_ids())
         measurements = []
-        while len(measurements) < 300:                
+        while len(measurements) < 600:                
             GPIO.output(PIN_TRIGGER, GPIO.HIGH)            
             time.sleep(0.000001)
             GPIO.output(PIN_TRIGGER, GPIO.LOW)
@@ -55,10 +55,10 @@ try:
             else:
                 logging.warning(f"[{CONTEXT}] invalid measurement")
                 
-            time.sleep(0.01)
+            time.sleep(0.1)
         
         measurements.sort()
-        volume = round(sum(measurements[75:225]) / 150, 2)
+        volume = round(sum(measurements[150:450]) / 300, 2)
         
         if not volume is None:
             measurements_avg.append(volume)
@@ -72,8 +72,8 @@ try:
         else:
             logging.warning(f"[{CONTEXT}] average could not be calculated")
         
-        if len(measurements_avg) >= 100:
-            utils.retry_if_none(lambda : repo.set_value(WATERVOLUME_AVG, round(sum(measurements_avg[25:75]) / 50, 2)))
+        if len(measurements_avg) >= 10:
+            utils.retry_if_none(lambda : repo.set_value(WATERVOLUME_AVG, round(sum(measurements_avg[2:8]) / 6, 2)))
             measurements_avg = []
         
 except KeyboardInterrupt:

@@ -33,7 +33,7 @@ try:
     while True:
         measurement_ids = utils.retry_if_none(lambda: repo.get_sensor_measurement_ids())
         measurements = []
-        while len(measurements) < 300:                
+        while len(measurements) < 600:                
             GPIO.output(PIN_TRIGGER, GPIO.HIGH)            
             time.sleep(0.000001)
             GPIO.output(PIN_TRIGGER, GPIO.LOW)
@@ -53,10 +53,10 @@ try:
             else:
                 logging.warning(f"[{CONTEXT}] invalid measurement")
                 
-            time.sleep(0.01)
+            time.sleep(0.1)
         
         measurements.sort()
-        volume = round(sum(measurements[75:225]) / 150, 2)
+        volume = round(sum(measurements[150:450]) / 300, 2)
         
         if not volume is None:
             utils.retry_if_none(lambda : repo.set_value(CONTEXT, volume))

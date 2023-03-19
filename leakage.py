@@ -21,13 +21,13 @@ try:
     while True:
         measurement_ids = utils.retry_if_none(lambda: repo.get_sensor_measurement_ids())
         measurements = []
-        while len(measurements) < 50:
+        while len(measurements) < 600:
             value = adc.read( channel = LEAKAGE_CHANNEL )
             measurements.append(value)
             time.sleep(0.1)
     
         measurements.sort()
-        leakage = 100 - round(sum(measurements[10:40]) / (30 * 10.23), 2)
+        leakage = 100 - round(sum(measurements[150:450]) / (300 * 10.23), 2)
         
         if not leakage is None:
             utils.retry_if_none(lambda : repo.set_value(CONTEXT, leakage))

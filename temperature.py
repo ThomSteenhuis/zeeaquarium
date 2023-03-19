@@ -50,7 +50,7 @@ try:
         else:
             logging.warning(f"[{CONTEXT}] temp sensors could not be retrieved from repo")
         
-        time.sleep(3)
+        time.sleep(60)
 except KeyboardInterrupt:
     pass
 except:
