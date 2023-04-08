@@ -67,8 +67,9 @@ try:
             if token == None or parser.parse(token['expiresAt']) < datetime.now(timezone.utc) + timedelta(hours = 1):
                 token = utils.retry_if_none(lambda : utils.get_token_client_credentials(CONTEXT))
             
-            now = datetime.utcnow().isoformat()
-            utils.post_measurement(CONTEXT, token["accessToken"], USER_ID, REEF_ID, measurement_ids[CONTEXT], now, volume)
+            if token != None:
+                now = datetime.utcnow().isoformat()
+                utils.post_measurement(CONTEXT, token["accessToken"], USER_ID, REEF_ID, measurement_ids[CONTEXT], now, volume)
         else:
             logging.warning(f"[{CONTEXT}] average could not be calculated")
         

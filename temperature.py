@@ -43,8 +43,9 @@ try:
                     if token == None or parser.parse(token['expiresAt']) < datetime.now(timezone.utc) + timedelta(hours = 1):
                         token = utils.retry_if_none(lambda : utils.get_token_client_credentials(CONTEXT))
                     
-                    now = datetime.utcnow().isoformat()
-                    utils.post_measurement(CONTEXT, token["accessToken"], USER_ID, REEF_ID, measurement_ids[temp_item[0]], now, temp)
+                    if token != None:
+                        now = datetime.utcnow().isoformat()
+                        utils.post_measurement(CONTEXT, token["accessToken"], USER_ID, REEF_ID, measurement_ids[temp_item[0]], now, temp)
                 else:
                     logging.warning(f"[{CONTEXT}] no valid measurement")
         else:
