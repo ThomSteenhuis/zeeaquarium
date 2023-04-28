@@ -13,7 +13,7 @@ DB_SENSOR_RAW_VALUES = "sensor_raw_values"
 DB_TEMP_SENSORS = "temp_sensors"
 CONTEXT = "sensor_repo"
 
-MAX_SECONDS_OUTDATED = 60
+MAX_SECONDS_OUTDATED = 300
 
 class sensor_repo:
     def __init__(self):
