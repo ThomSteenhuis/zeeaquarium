@@ -45,6 +45,9 @@ try:
                     
             time.sleep(1)
         
+        if len(temps) == 0:
+            continue
+        
         average_temp = sum(temps) / len(temps)
         if average_temp > (temp_heating_threshold + MARGIN):
             utils.retry_if_none(lambda : device_repo.set_value(HEATING, False)) #Off
