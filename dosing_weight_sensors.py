@@ -45,8 +45,8 @@ try:
             
             value = sum(measurements[30:70]) / len(measurements[30:70])
             
-            cur_raw_value = utils.retry_if_none(lambda : sensor_repo.get_value(f"dosing_pump_1_weight_raw"), 3600) or "0.0"
-            cur_value = utils.retry_if_none(lambda : sensor_repo.get_value(f"dosing_pump_1_weight"), 3600) or "0.0"
+            cur_raw_value = utils.retry_if_none(lambda : sensor_repo.get_value(f"dosing_pump_1_weight_raw", 3600)) or "0.0"
+            cur_value = utils.retry_if_none(lambda : sensor_repo.get_value(f"dosing_pump_1_weight", 3600)) or "0.0"
             
             utils.retry_if_none(lambda : sensor_repo.set_value(f"dosing_pump_1_weight_raw", str(value)))
             
