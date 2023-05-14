@@ -53,7 +53,7 @@ try:
             if not restarted:
                 diff = value - float(cur_raw_value)
                 if diff > 50:
-                    initial_value = utils.retry_if_none(lambda : setting_repo.get_value(f"doseerpomp_1_initial_weight")) or "0.0"
+                    initial_value = utils.retry_if_none(lambda : setting_repo.get_value(f"dosing_pump_1_initial_weight")) or "0.0"
                     utils.retry_if_none(lambda : sensor_repo.set_value(f"dosing_pump_1_weight", initial_value))
                 else:
                     utils.retry_if_none(lambda : sensor_repo.set_value(f"dosing_pump_1_weight", str(float(cur_value) + diff)))
