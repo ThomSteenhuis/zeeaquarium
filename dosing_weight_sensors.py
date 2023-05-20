@@ -9,9 +9,6 @@ import setting_repo as setr
 import utils
 
 CONTEXT = "dosing_weight_sensors"
-PIN_DOUT = 38
-PIN_PD_SCK = 40
-REF_UNIT = -1938
 
 utils.setup_logging(CONTEXT)
 sensor_repo = sr.sensor_repo()
