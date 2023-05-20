@@ -11,6 +11,8 @@ DB_SENSOR_MEASUREMENT_IDS = "sensor_measurement_ids"
 DB_SENSOR_VALUES = "sensor_values"
 DB_SENSOR_RAW_VALUES = "sensor_raw_values"
 DB_TEMP_SENSORS = "temp_sensors"
+DB_WEIGHT_SENSORS = "weight_sensors"
+
 CONTEXT = "sensor_repo"
 
 MAX_SECONDS_OUTDATED = 300
@@ -87,6 +89,28 @@ class sensor_repo:
         else:
             logging.warning(f"[{CONTEXT}] temp sensors cannot be found in db")
     
+    def get_weight_sensors(self):
+        if not self.cursor:
+            logging.warning(f"[{CONTEXT}] cursor not set")
+            return
+        
+        try:
+            self.cursor.execute(f"select id, name, pin_dout, pin_sck, ref from {DB_WEIGHT_SENSORS};")
+            weight_sensors = self.cursor.fetchall()
+        except:
+            logging.warning(f"[{CONTEXT}] db query failed")
+            weight_sensors = None
+        
+        if weight_sensors:
+            sensors = {}
+            for sensor in weight_sensors:
+                if len(sensor) == 5:
+                    sensors[sensor[0]] = { "name": sensor[1], "pin_dout": sensor[2], "pin_sck": sensor[3], "ref": sensor[4] }
+                
+            return sensors
+        else:
+            logging.warning(f"[{CONTEXT}] weight sensors cannot be found in db")
+            
     def get_value(self, name, max_seconds_outdated = MAX_SECONDS_OUTDATED):
         if not self.cursor:
             logging.warning(f"[{CONTEXT}] cursor not set")
