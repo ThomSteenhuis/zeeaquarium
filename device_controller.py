@@ -77,17 +77,17 @@ try:
                     GPIO.output(p["pin"], GPIO.LOW) # Off
         
         bus_pin_outputs = {}
-        for p in bus_pins:
-            value = utils.retry_if_none(lambda : repo.get_value(p["name"]))
+        for x in bus_pins:
+            value = utils.retry_if_none(lambda : repo.get_value(x["name"]))
         
             if value is None or not isinstance(value, bool):
                 logging.warning(f"[{CONTEXT}] illegal value")
             else:
-                if value and p["default"]:
+                if value and x["default"]:
                     bus_pin_outputs[str(x["pin"] - 100)] = 0 # On
-                elif value and not p["default"]:
+                elif value and not x["default"]:
                     bus_pin_outputs[str(x["pin"] - 100)] = 1 # On
-                elif not value and p["default"]:
+                elif not value and x["default"]:
                     bus_pin_outputs[str(x["pin"] - 100)] = 1 # Off
                 else:
                     bus_pin_outputs[str(x["pin"] - 100)] = 0 # Off
