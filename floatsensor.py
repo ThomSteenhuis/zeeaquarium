@@ -9,7 +9,7 @@ import utils
 
 CONTEXT = "vlotter"
 CHANNEL = 8
-THRESHOLD = 25000
+THRESHOLD = 20000
 USER_ID = utils.read_secret("user_id")
 REEF_ID = utils.read_secret("reef_id")
 
