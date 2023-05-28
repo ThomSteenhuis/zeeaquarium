@@ -93,7 +93,10 @@ try:
                     bus_pin_outputs[str(x["pin"] - 100)] = 0 # Off
         
         value_hexa_decimal = to_hexa_decimal(bus_pin_outputs.get("1") or 0, bus_pin_outputs.get("2") or 0, bus_pin_outputs.get("3") or 0, bus_pin_outputs.get("4") or 0, bus_pin_outputs.get("5") or 0, bus_pin_outputs.get("6") or 0, bus_pin_outputs.get("7") or 0, bus_pin_outputs.get("8") or 0)
-        bus.write_byte_data(DEVICE,OLATA, value_hexa_decimal)
+        try:
+            bus.write_byte_data(DEVICE,OLATA, value_hexa_decimal)
+        except OSError:
+            logging.warning(f"[{CONTEXT}] cannot write data to bus")
         
         time.sleep(0.2)          
 except KeyboardInterrupt:
