@@ -22,6 +22,17 @@ GPIOA  = 0x12 # Register for inputs
 def to_hexa_decimal(val1 = 0, val2 = 0, val3 = 0, val4 = 0, val5 = 0, val6 = 0, val7 = 0, val8 = 0):
     return val1 + (2 * val2) + (4 * val3) + (8 * val4) + (16 * val5) + (32 * val6) + (64 * val7) + (128 * val8)
 
+def write_byte_data_to_bus(device, address, value, max_retries = 10):
+    retry = True
+    retryCount = 0
+    while retry and retryCount <= max_retries:
+        try:
+            retry = False
+            bus.write_byte_data(device, address, value)   
+        except OSError:
+            retry = True
+            retryCount = retryCount + 1
+
 pins = []
 device_relays = utils.retry_if_none(lambda : repo.get_device_relays())
 for device_relay in device_relays:
@@ -39,11 +50,11 @@ try:
     default_hexa_decimal = to_hexa_decimal(bus_pin_defaults.get("1") or 0, bus_pin_defaults.get("2") or 0, bus_pin_defaults.get("3") or 0, bus_pin_defaults.get("4") or 0, bus_pin_defaults.get("5") or 0, bus_pin_defaults.get("6") or 0, bus_pin_defaults.get("7") or 0, bus_pin_defaults.get("8") or 0)
 
     # Set all GPA pins as outputs by setting all bits of IODIRA register to 0
-    bus.write_byte_data(DEVICE,IODIRA, 0x00)
+    write_byte_data_to_bus(DEVICE, IODIRA, 0x00, 100)
     time.sleep(0.2)
-    bus.write_byte_data(DEVICE,OLATA, 255 - default_hexa_decimal)
+    write_byte_data_to_bus(DEVICE, OLATA, 255 - default_hexa_decimal, 100)
     time.sleep(0.2)
-    bus.write_byte_data(DEVICE,OLATA, default_hexa_decimal)        
+    write_byte_data_to_bus(DEVICE, OLATA, default_hexa_decimal, 100)        
     
     GPIO.setmode(GPIO.BOARD)
     for p in pins:
@@ -93,10 +104,7 @@ try:
                     bus_pin_outputs[str(x["pin"] - 100)] = 0 # Off
         
         value_hexa_decimal = to_hexa_decimal(bus_pin_outputs.get("1") or 0, bus_pin_outputs.get("2") or 0, bus_pin_outputs.get("3") or 0, bus_pin_outputs.get("4") or 0, bus_pin_outputs.get("5") or 0, bus_pin_outputs.get("6") or 0, bus_pin_outputs.get("7") or 0, bus_pin_outputs.get("8") or 0)
-        try:
-            bus.write_byte_data(DEVICE,OLATA, value_hexa_decimal)
-        except OSError:
-            logging.warning(f"[{CONTEXT}] cannot write data to bus")
+        write_byte_data_to_bus(DEVICE, OLATA, value_hexa_decimal)
         
         time.sleep(0.2)          
 except KeyboardInterrupt:
