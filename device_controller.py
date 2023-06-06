@@ -87,6 +87,9 @@ try:
                 else:
                     GPIO.output(p["pin"], GPIO.LOW) # Off
         
+        # Set all GPA pins as outputs by setting all bits of IODIRA register to 0
+        write_byte_data_to_bus(DEVICE, IODIRA, 0x00)
+        
         bus_pin_outputs = {}
         for x in bus_pins:
             value = utils.retry_if_none(lambda : repo.get_value(x["name"]))
